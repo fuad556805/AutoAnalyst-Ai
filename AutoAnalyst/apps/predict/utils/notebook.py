@@ -1,20 +1,19 @@
 import json
-import textwrap
 
 
-def _md_cell(source: str) -> dict:
+def _md(source: str) -> dict:
     return {
         "cell_type": "markdown",
-        "id": f"md-{abs(hash(source[:30])) % 10**8}",
+        "id": f"md-{abs(hash(source[:40])) % 10**8}",
         "metadata": {},
         "source": source,
     }
 
 
-def _code_cell(source: str) -> dict:
+def _code(source: str) -> dict:
     return {
         "cell_type": "code",
-        "id": f"code-{abs(hash(source[:30])) % 10**8}",
+        "id": f"code-{abs(hash(source[:40])) % 10**8}",
         "execution_count": None,
         "metadata": {},
         "outputs": [],
@@ -31,8 +30,10 @@ def generate_notebook(meta: dict, dataset_name: str) -> str:
     feature_names   = meta.get('feature_names', [])
     label_mappings  = meta.get('label_mappings', {})
     pre             = meta.get('preprocessing', {})
-    encoded_cols    = pre.get('encoded_cols', [])
 
+    is_clf = problem_type == 'classification'
+
+    # ── model init strings ────────────────────────────────────────────────────
     clf_map = {
         'Logistic Regression':    'LogisticRegression(max_iter=2000, random_state=42)',
         'Random Forest':          'RandomForestClassifier(n_estimators=100, random_state=42)',
@@ -41,222 +42,343 @@ def generate_notebook(meta: dict, dataset_name: str) -> str:
     }
     reg_map = {
         'Linear Regression':       'LinearRegression()',
+        'Ridge Regression':        'Ridge(alpha=1.0)',
         'Random Forest Regressor': 'RandomForestRegressor(n_estimators=100, random_state=42)',
-        'Ridge Regression':        'Ridge()',
     }
-    model_init = (clf_map if problem_type == 'classification' else reg_map).get(
-        best_model_name, 'RandomForestClassifier(n_estimators=100, random_state=42)'
-    )
+    model_map  = clf_map if is_clf else reg_map
+    model_init = model_map.get(best_model_name,
+                               'RandomForestClassifier(n_estimators=100, random_state=42)')
 
-    imports_clf = textwrap.dedent("""\
-        from sklearn.linear_model import LogisticRegression, Ridge, LinearRegression
-        from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-        from sklearn.neighbors import KNeighborsClassifier
-        from sklearn.svm import SVC
-        from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-        import seaborn as sns""")
+    # ── categorical columns (encoded) ─────────────────────────────────────────
+    cat_cols = [f for f in feature_names if f in label_mappings]
 
-    imports_reg = textwrap.dedent("""\
-        from sklearn.linear_model import LinearRegression, Ridge
-        from sklearn.ensemble import RandomForestRegressor
-        from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
-        import matplotlib.pyplot as plt""")
+    # figure out a couple of example columns for visualisations
+    first_cat  = cat_cols[0] if cat_cols else None
+    second_cat = cat_cols[1] if len(cat_cols) > 1 else first_cat
+    num_cols   = [f for f in feature_names if f not in label_mappings]
+    first_num  = num_cols[0] if num_cols else None
 
-    enc_cols_repr   = repr(encoded_cols)
-    feat_names_repr = repr(feature_names)
-
-    eval_clf = textwrap.dedent(f"""\
-        preds = model.predict(X_test)
-        acc   = accuracy_score(y_test, preds)
-        print(f"Accuracy: {{acc*100:.2f}}%")
-        print()
-        print(classification_report(y_test, preds))
-        cm = confusion_matrix(y_test, preds)
-        plt.figure(figsize=(6, 4))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Greys')
-        plt.title('Confusion Matrix'); plt.xlabel('Predicted'); plt.ylabel('Actual')
-        plt.tight_layout(); plt.show()""")
-
-    eval_reg = textwrap.dedent(f"""\
-        preds = model.predict(X_test)
-        r2  = r2_score(y_test, preds)
-        mse = mean_squared_error(y_test, preds)
-        mae = mean_absolute_error(y_test, preds)
-        print(f"R²   : {{r2*100:.2f}}%")
-        print(f"MSE  : {{mse:.4f}}")
-        print(f"MAE  : {{mae:.4f}}")
-        print(f"RMSE : {{mse**0.5:.4f}}")
-        plt.figure(figsize=(6, 4))
-        plt.scatter(y_test, preds, alpha=0.5, color='#18181b', s=20)
-        mn, mx = min(y_test.min(), preds.min()), max(y_test.max(), preds.max())
-        plt.plot([mn, mx], [mn, mx], 'r--', label='Perfect fit')
-        plt.xlabel('Actual'); plt.ylabel('Predicted'); plt.title('Actual vs Predicted')
-        plt.legend(); plt.tight_layout(); plt.show()""")
-
-    feature_comments = '\n'.join(
-        f'    "{f}": 0,  # '
-        + (f'categorical — e.g. {label_mappings[f][:3]}' if f in label_mappings else 'numeric')
-        for f in feature_names
-    )
-
-    cells = [
-        _md_cell(f"""\
-# AutoAnalyst AI — Machine Learning Notebook
-**Dataset:** `{dataset_name}`  
-**Target:** `{target}`  
-**Problem Type:** {problem_type.title()}  
-**Best Model:** {best_model_name}  
-**{metric_label}:** {best_score}%
-
----
-Auto-generated by **AutoAnalyst AI**. Reproduces the complete ML pipeline end-to-end.
-"""),
-        _md_cell("## 1. Imports"),
-        _code_cell(f"""\
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import warnings
-warnings.filterwarnings('ignore')
-
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, StandardScaler
-{imports_clf if problem_type == 'classification' else imports_reg}
-
-print("Libraries loaded.")
-"""),
-        _md_cell("## 2. Load Dataset"),
-        _code_cell(f"""\
-df = pd.read_csv("{dataset_name}")   # or pd.read_excel(...)
-print(f"Shape: {{df.shape[0]}} rows × {{df.shape[1]}} columns")
-df.head(10)
-"""),
-        _md_cell("## 3. Exploratory Data Analysis"),
-        _code_cell(f"""\
-print("=== Missing Values ===")
-missing = df.isnull().sum()
-print(missing[missing > 0].to_string() or "None")
-print(f"\\n=== Duplicates: {{df.duplicated().sum()}} ===")
-print("\\n=== Types ===")
-print(df.dtypes.to_string())
-print("\\n=== Summary ===")
-df.describe(include='all')
-"""),
-        _md_cell("## 4. Preprocessing"),
-        _code_cell(f"""\
-TARGET = "{target}"
-df = df.dropna(subset=[TARGET])
-
-SKIP_COLS = ['id', 'index', 'row', 'no', 'num', 'uuid', 'email', 'phone', 'name']
-cols_to_drop = [
-    col for col in df.columns if col != TARGET and (
-        df[col].isna().mean() > 0.80 or
-        df[col].nunique() <= 1 or
-        col.lower() in SKIP_COLS
-    )
-]
-if cols_to_drop:
-    print(f"Dropping: {{cols_to_drop}}")
-    df = df.drop(columns=cols_to_drop)
-
-for col in df.columns:
-    if df[col].isna().any():
-        if pd.api.types.is_numeric_dtype(df[col]):
-            df[col] = df[col].fillna(df[col].median())
+    # sample values for prediction cell
+    sample_vals = {}
+    for f in feature_names:
+        if f in label_mappings and label_mappings[f]:
+            sample_vals[f] = f'"{label_mappings[f][0]}"'
         else:
-            df[col] = df[col].fillna(df[col].mode().iloc[0])
+            sample_vals[f] = '0'
+    sample_lines = '\n'.join(
+        f'    "{f}": {v},  # {"categorical" if f in label_mappings else "numeric"}'
+        for f, v in sample_vals.items()
+    )
 
-encoders = {{}}
-label_mappings = {{}}
-for col in df.columns:
-    if not pd.api.types.is_numeric_dtype(df[col]):
-        le = LabelEncoder()
-        df[col] = le.fit_transform(df[col].astype(str))
-        encoders[col] = le
-        label_mappings[col] = list(le.classes_)
+    # ── sklearn imports ───────────────────────────────────────────────────────
+    if is_clf:
+        sklearn_imports = (
+            "from sklearn.linear_model import LogisticRegression\n"
+            "from sklearn.ensemble import RandomForestClassifier\n"
+            "from sklearn.neighbors import KNeighborsClassifier\n"
+            "from sklearn.svm import SVC\n"
+            "from sklearn.metrics import accuracy_score, classification_report, confusion_matrix"
+        )
+    else:
+        sklearn_imports = (
+            "from sklearn.linear_model import LinearRegression, Ridge\n"
+            "from sklearn.ensemble import RandomForestRegressor\n"
+            "from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error"
+        )
 
-for col in df.columns:
-    df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+    cells = []
 
-FEATURE_NAMES = {feat_names_repr}
-X = df[FEATURE_NAMES].astype(float)
-y = df[TARGET]
+    # ══════════════════════════════════════════════════════════════════════════
+    # TITLE
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md(
+        f"# {problem_type.title()} — {target.title()}\n\n"
+        f"**Dataset:** `{dataset_name}`  \n"
+        f"**Target:** `{target}`  \n"
+        f"**Best Model:** {best_model_name} — **{metric_label}: {best_score}%**\n\n"
+        f"---\n"
+        f"*Auto-generated by AutoAnalyst AI*"
+    ))
 
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-X_train, X_test, y_train, y_test = train_test_split(
-    X_scaled, y, test_size=0.2, random_state=42)
-print(f"Train: {{len(X_train)}}, Test: {{len(X_test)}}")
-"""),
-        _md_cell(f"## 5. Train — {best_model_name}"),
-        _code_cell(f"""\
-model = {model_init}
-model.fit(X_train, y_train)
-print(f"Trained: {{type(model).__name__}}")
-"""),
-        _md_cell("## 6. Evaluate"),
-        _code_cell(eval_clf if problem_type == 'classification' else eval_reg),
-        _md_cell("## 7. Feature Importance"),
-        _code_cell(f"""\
-feature_names = {feat_names_repr}
-if hasattr(model, 'feature_importances_'):
-    importances = model.feature_importances_
-elif hasattr(model, 'coef_'):
-    importances = np.abs(model.coef_).flatten()[:len(feature_names)]
-else:
-    importances = None
+    # ══════════════════════════════════════════════════════════════════════════
+    # 1. IMPORTS
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md("## Imports"))
+    cells.append(_code(
+        "import pandas as pd\n"
+        "import numpy as np\n"
+        "import seaborn as sns\n"
+        "import matplotlib.pyplot as plt\n"
+        "\n"
+        "from sklearn.preprocessing import LabelEncoder, StandardScaler\n"
+        "from sklearn.model_selection import train_test_split\n"
+        f"{sklearn_imports}"
+    ))
 
-if importances is not None:
-    fi_df = pd.DataFrame({{'Feature': feature_names, 'Importance': importances}})
-    fi_df = fi_df.sort_values('Importance', ascending=False).reset_index(drop=True)
-    print(fi_df.to_string(index=False))
-    plt.figure(figsize=(8, max(4, len(feature_names) * 0.4)))
-    plt.barh(fi_df['Feature'][::-1], fi_df['Importance'][::-1], color='#18181b')
-    plt.xlabel('Importance'); plt.title('Feature Importance')
-    plt.tight_layout(); plt.show()
-"""),
-        _md_cell("## 8. Predict New Sample"),
-        _code_cell(f"""\
-new_sample = {{
-{feature_comments}
-}}
-sample_arr = scaler.transform(pd.DataFrame([new_sample])[feature_names].astype(float))
-prediction = model.predict(sample_arr)[0]
+    # ══════════════════════════════════════════════════════════════════════════
+    # 2. LOAD DATA
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md("## Load Data"))
+    ext = dataset_name.rsplit('.', 1)[-1].lower() if '.' in dataset_name else 'csv'
+    reader = f'pd.read_csv("{dataset_name}")' if ext == 'csv' else f'pd.read_excel("{dataset_name}")'
+    cells.append(_code(
+        f"df = {reader}\n"
+        "df"
+    ))
 
-label_mappings_local = {repr(label_mappings)}
-target_lm = label_mappings_local.get("{target}")
-if target_lm is not None:
-    try:
-        prediction_label = target_lm[int(prediction)]
-    except Exception:
-        prediction_label = str(prediction)
-else:
-    prediction_label = str(prediction)
+    cells.append(_code("df.shape"))
 
-print(f"Predicted {target}: {{prediction_label}}")
-"""),
-        _md_cell("## 9. Save & Load Model"),
-        _code_cell(f"""\
-import joblib
-joblib.dump({{
-    'model':          model,
-    'scaler':         scaler,
-    'encoders':       encoders,
-    'label_mappings': label_mappings,
-    'feature_names':  feature_names,
-    'problem_type':   '{problem_type}',
-    'target':         '{target}',
-}}, 'best_model.joblib')
-print("Saved to best_model.joblib")
-"""),
-    ]
+    cells.append(_code("df.isnull().sum()"))
+
+    cells.append(_code("df.duplicated().sum()"))
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # 3. EDA
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md("## Visualization"))
+    cells.append(_code("df.head(4)"))
+
+    cells.append(_code("df.describe()"))
+
+    # target distribution
+    if is_clf:
+        cells.append(_code(f"sns.countplot(df['{target}'])"))
+        cells.append(_code(f"df['{target}'].value_counts()"))
+
+        if first_cat:
+            cells.append(_code(
+                f"sns.countplot(x='{first_cat}', hue='{target}', data=df)"
+            ))
+            cells.append(_code(f"df['{first_cat}'].value_counts()"))
+
+        if first_num:
+            cells.append(_code(
+                f"sns.histplot(data=df, x='{first_num}', hue='{target}', bins=30)"
+            ))
+
+        if second_cat and second_cat != first_cat:
+            cells.append(_code(
+                f"sns.countplot(x='{second_cat}', hue='{target}', data=df)"
+            ))
+
+        if first_num:
+            cells.append(_code(
+                f"sns.boxplot(x='{first_num}', hue='{target}', data=df)"
+            ))
+    else:
+        if first_num:
+            cells.append(_code(
+                f"sns.histplot(data=df, x='{first_num}', bins=30)"
+            ))
+        if first_cat:
+            cells.append(_code(
+                f"sns.countplot(x='{first_cat}', data=df)"
+            ))
+        cells.append(_code(
+            f"sns.histplot(data=df, x='{target}', bins=30)"
+        ))
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # 4. PREPROCESSING
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md("## Data Preprocessing"))
+
+    # columns to keep = feature_names + target
+    keep_cols = feature_names + [target]
+    drop_comment = "# Drop ID-like and uninformative columns"
+    keep_repr = repr(keep_cols)
+    cells.append(_code(
+        f"{drop_comment}\n"
+        f"data = df[{keep_repr}]\n"
+        "\n"
+        "data.head(5)"
+    ))
+
+    cells.append(_code("data.shape"))
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # 5. LABEL ENCODING
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md("## Label Encoding"))
+    cells.append(_code(
+        "from sklearn.preprocessing import LabelEncoder\n"
+        "\n"
+        "for column in data.columns:\n"
+        "    if data[column].dtype == 'object':\n"
+        "        data[column] = LabelEncoder().fit_transform(data[column])\n"
+        "\n"
+        "data"
+    ))
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # 6. TRAIN / TEST SPLIT
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md("## Train and Test Data"))
+    cells.append(_code(
+        f'x = data.drop("{target}", axis=1)\n'
+        f'y = data["{target}"]\n'
+        "\n"
+        "y"
+    ))
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # 7. SCALING
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md("## Scaling the Data"))
+    cells.append(_code(
+        "feature_x = StandardScaler().fit_transform(x)\n"
+        "\n"
+        "feature_x"
+    ))
+
+    cells.append(_md("## Split Data"))
+    cells.append(_code(
+        "xtrain, xtest, ytrain, ytest = train_test_split(\n"
+        "    feature_x, y, test_size=0.25, random_state=42\n"
+        ")\n"
+        "\n"
+        f"print(f'Train: {{len(xtrain)}} rows')\n"
+        f"print(f'Test:  {{len(xtest)}} rows')"
+    ))
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # 8. TRAIN MODEL
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md(f"## {best_model_name}"))
+    cells.append(_code(
+        f"model = {model_init}\n"
+        "model.fit(xtrain, ytrain)"
+    ))
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # 9. EVALUATE
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md("## Evaluation"))
+    if is_clf:
+        cells.append(_code(
+            "preds = model.predict(xtest)\n"
+            "\n"
+            "acc = accuracy_score(ytest, preds)\n"
+            "print(f'Accuracy: {acc*100:.2f}%')"
+        ))
+        cells.append(_code(
+            "print(classification_report(ytest, preds))"
+        ))
+        cells.append(_code(
+            "cm = confusion_matrix(ytest, preds)\n"
+            "\n"
+            "plt.figure(figsize=(6, 4))\n"
+            "sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')\n"
+            "plt.title('Confusion Matrix')\n"
+            "plt.xlabel('Predicted')\n"
+            "plt.ylabel('Actual')\n"
+            "plt.tight_layout()\n"
+            "plt.show()"
+        ))
+    else:
+        cells.append(_code(
+            "preds = model.predict(xtest)\n"
+            "\n"
+            "r2   = r2_score(ytest, preds)\n"
+            "mse  = mean_squared_error(ytest, preds)\n"
+            "mae  = mean_absolute_error(ytest, preds)\n"
+            "rmse = mse ** 0.5\n"
+            "\n"
+            "print(f'R²   : {r2*100:.2f}%')\n"
+            "print(f'MAE  : {mae:.4f}')\n"
+            "print(f'MSE  : {mse:.4f}')\n"
+            "print(f'RMSE : {rmse:.4f}')"
+        ))
+        cells.append(_code(
+            "plt.figure(figsize=(6, 4))\n"
+            "plt.scatter(ytest, preds, alpha=0.5, color='steelblue', s=20)\n"
+            "mn = min(ytest.min(), preds.min())\n"
+            "mx = max(ytest.max(), preds.max())\n"
+            "plt.plot([mn, mx], [mn, mx], 'r--', label='Perfect fit')\n"
+            f"plt.xlabel('Actual {target}')\n"
+            f"plt.ylabel('Predicted {target}')\n"
+            "plt.title('Actual vs Predicted')\n"
+            "plt.legend()\n"
+            "plt.tight_layout()\n"
+            "plt.show()"
+        ))
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # 10. FEATURE IMPORTANCE
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md("## Feature Importance"))
+    cells.append(_code(
+        f"feature_names = {repr(feature_names)}\n"
+        "\n"
+        "if hasattr(model, 'feature_importances_'):\n"
+        "    importances = model.feature_importances_\n"
+        "elif hasattr(model, 'coef_'):\n"
+        "    importances = np.abs(model.coef_).flatten()[:len(feature_names)]\n"
+        "else:\n"
+        "    importances = None\n"
+        "\n"
+        "if importances is not None:\n"
+        "    fi = pd.DataFrame({'Feature': feature_names, 'Importance': importances})\n"
+        "    fi = fi.sort_values('Importance', ascending=False).reset_index(drop=True)\n"
+        "    print(fi.to_string(index=False))\n"
+        "    plt.figure(figsize=(8, max(4, len(feature_names) * 0.45)))\n"
+        "    plt.barh(fi['Feature'][::-1], fi['Importance'][::-1], color='steelblue')\n"
+        "    plt.xlabel('Importance Score')\n"
+        "    plt.title('Feature Importance')\n"
+        "    plt.tight_layout()\n"
+        "    plt.show()"
+    ))
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # 11. PREDICT NEW SAMPLE
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md("## Predict New Sample"))
+    cells.append(_code(
+        f"new_sample = {{\n"
+        f"{sample_lines}\n"
+        f"}}\n"
+        "\n"
+        "sample_df = pd.DataFrame([new_sample])\n"
+        "\n"
+        "# Encode categorical columns\n"
+        f"label_maps = {repr(label_mappings)}\n"
+        "for col, classes in label_maps.items():\n"
+        "    if col in sample_df.columns:\n"
+        "        le = LabelEncoder()\n"
+        "        le.classes_ = np.array(classes)\n"
+        "        sample_df[col] = le.transform(sample_df[col].astype(str))\n"
+        "\n"
+        "scaler_new = StandardScaler().fit(x)  # refit on training data\n"
+        f"X_new = scaler_new.transform(sample_df[{repr(feature_names)}].astype(float))\n"
+        "prediction = model.predict(X_new)[0]\n"
+        "\n"
+        f"print(f'Predicted {target}: {{prediction}}')"
+    ))
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # 12. SAVE MODEL
+    # ══════════════════════════════════════════════════════════════════════════
+    cells.append(_md("## Save Model"))
+    cells.append(_code(
+        "import joblib\n"
+        "\n"
+        "joblib.dump(model, 'best_model.joblib')\n"
+        "print('Model saved to best_model.joblib')"
+    ))
 
     notebook = {
         "nbformat": 4,
         "nbformat_minor": 5,
         "metadata": {
-            "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
-            "language_info": {"name": "python", "version": "3.11.0"},
+            "kernelspec": {
+                "display_name": "Python 3",
+                "language": "python",
+                "name": "python3",
+            },
+            "language_info": {
+                "name": "python",
+                "version": "3.11.0",
+            },
         },
         "cells": cells,
     }
