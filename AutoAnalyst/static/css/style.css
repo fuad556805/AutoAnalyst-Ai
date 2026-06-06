@@ -542,7 +542,7 @@ body {
 .sidebar {
   border-right: 1px solid var(--border);
   padding: 20px 12px;
-  background: var(--bg-subtle);
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -890,7 +890,7 @@ select option { background: var(--white); }
 .messages .info, .messages .warning { background: var(--warning-bg); color: var(--warning); border: 1px solid #fde68a; }
 
 /* ── AUTH ────────────────────────────────────────── */
-.auth-wrap { min-height: calc(100vh - 58px); display: flex; align-items: center; justify-content: center; padding: 40px 24px; background: var(--bg-muted); }
+.auth-wrap { min-height: calc(100vh - 58px); display: flex; align-items: center; justify-content: center; padding: 40px 24px; background: var(--bg); }
 .auth-card { width: 100%; max-width: 420px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 40px; box-shadow: var(--shadow-md); }
 .auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
 .auth-logo-icon { width: 34px; height: 34px; background: var(--black); border-radius: 9px; display: flex; align-items: center; justify-content: center; }
