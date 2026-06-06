@@ -18,6 +18,7 @@ def detect_problem_type(series: pd.Series) -> str:
 
 def clean_df(df: pd.DataFrame, target_col: str):
     rows_before = len(df)
+    df = df.drop_duplicates()
     df = df.dropna(subset=[target_col])
 
     ID_LIKE = {'id', 'index', 'row', 'no', 'num', '#', 'uuid',
