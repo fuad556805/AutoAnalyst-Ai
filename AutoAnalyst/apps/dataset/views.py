@@ -141,16 +141,32 @@ def preview(request):
             stat['top'] = str(df[col].mode().iloc[0]) if len(df[col].mode()) > 0 else 'N/A'
         col_stats.append(stat)
 
+    # ── After-cleaning estimates (before target is selected) ──────────────────
+    rows_after_dedup   = shape[0] - duplicates
+    high_missing_cols  = [c for c in columns if missing_pct[c] > 80]
+    constant_cols      = [c for c in columns if unique_counts[c] <= 1]
+    id_like_cols       = [c for c in columns
+                          if c.lower() in ('id', 'uuid', 'index', 'email', 'phone')]
+    dropped_cols_est   = list({*high_missing_cols, *constant_cols, *id_like_cols})
+    cols_after_est     = max(shape[1] - len(dropped_cols_est), 1)
+    missing_total      = sum(missing.values())
+
     context = {
-        'dataset_name':     request.session.get('dataset_name', 'dataset'),
-        'rows':             shape[0],
-        'cols':             shape[1],
-        'duplicates':       duplicates,
-        'preview_rows':     preview_rows,
-        'columns':          columns,
-        'col_stats':        col_stats,
-        'suggested_target': suggested_target,
-        'missing_total':    sum(missing.values()),
+        'dataset_name':      request.session.get('dataset_name', 'dataset'),
+        'rows':              shape[0],
+        'cols':              shape[1],
+        'duplicates':        duplicates,
+        'preview_rows':      preview_rows,
+        'columns':           columns,
+        'col_stats':         col_stats,
+        'suggested_target':  suggested_target,
+        'missing_total':     missing_total,
+        # after-cleaning estimates
+        'rows_after_dedup':  rows_after_dedup,
+        'cols_after_est':    cols_after_est,
+        'dropped_cols_est':  dropped_cols_est,
+        'high_missing_cols': high_missing_cols,
+        'constant_cols':     constant_cols,
     }
     return render(request, 'preview.html', context)
 

@@ -66,6 +66,49 @@
       </div>
     </div>
 
+    <!-- After Cleaning Estimate -->
+    <div class="card mb-20" style="border-left:3px solid #22c55e;">
+      <div class="card-header" style="padding-bottom:0;">
+        <div>
+          <div class="card-title">After Cleaning Estimate</div>
+          <div class="card-subtitle">Rows &amp; columns expected after duplicates and bad columns are removed</div>
+        </div>
+        <span class="badge" style="background:#dcfce7;color:#15803d;font-weight:600;">Auto-applied at training</span>
+      </div>
+      <div style="padding:18px 24px 20px;display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;">
+        <div style="text-align:center;min-width:90px;">
+          <div style="font-size:28px;font-weight:800;color:#15803d;letter-spacing:-1px;">{{ rows_after_dedup }}</div>
+          <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Rows kept</div>
+          {% if duplicates > 0 %}
+          <div style="font-size:11px;color:#ef4444;margin-top:3px;">−{{ duplicates }} duplicates removed</div>
+          {% endif %}
+        </div>
+        <div style="text-align:center;min-width:90px;">
+          <div style="font-size:28px;font-weight:800;color:#15803d;letter-spacing:-1px;">{{ cols_after_est }}</div>
+          <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Columns kept</div>
+          {% if dropped_cols_est %}
+          <div style="font-size:11px;color:#ef4444;margin-top:3px;">−{{ dropped_cols_est|length }} col(s) dropped</div>
+          {% endif %}
+        </div>
+        {% if dropped_cols_est %}
+        <div style="flex:1;min-width:180px;border-left:1px solid #e5e7eb;padding-left:24px;">
+          <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Columns to be dropped</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            {% for c in dropped_cols_est %}
+            <span style="background:#fee2e2;color:#b91c1c;font-size:11px;padding:2px 8px;border-radius:4px;font-family:monospace;">{{ c }}</span>
+            {% endfor %}
+          </div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:8px;">Reason: &gt;80% missing, constant, or ID-like column</div>
+        </div>
+        {% else %}
+        <div style="flex:1;min-width:180px;border-left:1px solid #e5e7eb;padding-left:24px;display:flex;align-items:center;gap:8px;">
+          <span style="color:#22c55e;font-size:20px;">✓</span>
+          <span style="font-size:13px;color:#6b7280;">All columns look good — none will be auto-dropped.</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
     <!-- First 10 rows preview -->
     <div class="card mb-20">
       <div class="card-header">
