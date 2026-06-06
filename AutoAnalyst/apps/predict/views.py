@@ -68,39 +68,86 @@ def predict(request):
 
             target_col = meta.get('target', '')
             target_lm  = label_mappings.get(target_col)
-            if problem_type == 'classification' and target_lm is not None:
-                try:
-                    pred_label = target_lm[int(pred)]
-                except Exception:
-                    pred_label = str(pred)
-            else:
-                pred_label = str(pred)
 
             if problem_type == 'classification':
+                # Case 1 — target was string-encoded (label_mappings holds the decoder)
+                if target_lm is not None:
+                    try:
+                        pred_label = target_lm[int(pred)]
+                    except Exception:
+                        pred_label = str(pred)
+                else:
+                    # Case 2 — target was already numeric; model.predict() returns
+                    # the actual class value directly (e.g. 0, 1, 2, …)
+                    # Just convert cleanly: 0.0 → "0", 1.0 → "1"
+                    try:
+                        fval = float(pred)
+                        if fval == int(fval):
+                            pred_label = str(int(fval))
+                        else:
+                            pred_label = str(pred)
+                    except Exception:
+                        pred_label = str(pred)
+
+                # Build a human-readable label line
+                display_label = f'Predicted: {target_col}'
+
+                # Collect all possible class labels for context
+                try:
+                    if target_lm is not None:
+                        all_classes = [str(c) for c in target_lm]
+                    else:
+                        raw_classes = list(model.classes_)
+                        all_classes = []
+                        for c in raw_classes:
+                            try:
+                                fval = float(c)
+                                all_classes.append(str(int(fval)) if fval == int(fval) else str(c))
+                            except Exception:
+                                all_classes.append(str(c))
+                    classes_str = ', '.join(f'<em>{c}</em>' for c in all_classes)
+                except Exception:
+                    classes_str = ''
+
+                explanation = (
+                    f'The model <strong>{best_model_name}</strong> analysed the '
+                    f'{len(feature_names)} input feature(s) and classified '
+                    f'<strong>{target_col}</strong> as '
+                    f'<strong>"{pred_label}"</strong>. '
+                )
+                if classes_str:
+                    explanation += f'Possible classes: {classes_str}. '
+                explanation += (
+                    f'Model {metric_label} on the test set: '
+                    f'<strong>{best_score}%</strong>.'
+                )
+
                 prediction_result = {
                     'value':         pred_label,
-                    'label':         'Predicted Class',
+                    'label':         display_label,
                     'input_summary': input_summary,
-                    'explanation': (
-                        f'Based on the {len(feature_names)} input features provided, '
-                        f'<strong>{best_model_name}</strong> classified the outcome as '
-                        f'<strong>"{pred_label}"</strong>. '
-                        f'The model achieved <strong>{best_score}%</strong> {metric_label} '
-                        f'on the test set during training.'
-                    ),
+                    'explanation':   explanation,
                 }
+
             else:
                 pred_rounded = round(float(pred), 4)
+                # Format: remove trailing zeros for whole numbers
+                if pred_rounded == int(pred_rounded):
+                    formatted = f'{int(pred_rounded):,}'
+                else:
+                    formatted = f'{pred_rounded:,.4f}'.rstrip('0').rstrip('.')
+
                 prediction_result = {
-                    'value':         f'{pred_rounded:,}',
+                    'value':         formatted,
                     'label':         f'Predicted {target_col}',
                     'input_summary': input_summary,
                     'explanation': (
-                        f'<strong>{best_model_name}</strong> estimated '
+                        f'<strong>{best_model_name}</strong> estimated the value of '
                         f'<strong>{target_col}</strong> to be '
-                        f'<strong>{pred_rounded:,}</strong> based on the '
-                        f'{len(feature_names)} input features. '
-                        f'The model achieved an R² of <strong>{best_score}%</strong> on the test set.'
+                        f'<strong>{formatted}</strong> based on the '
+                        f'{len(feature_names)} input feature(s). '
+                        f'Model R² Score on the test set: '
+                        f'<strong>{best_score}%</strong>.'
                     ),
                 }
         except Exception as e:
