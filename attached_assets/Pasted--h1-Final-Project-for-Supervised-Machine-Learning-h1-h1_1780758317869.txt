@@ -1,0 +1,137 @@
+<h1>Final Project for Supervised Machine Learning</h1>
+<h1>Customer Churn Prediction</h1>
+import pandas as pd
+import numpy as np 
+import seaborn as sns
+import matplotlib.pyplot as plt
+df = pd.read_csv("E:/Data Solution 360/Supervised Machine Learning/Final Assignment/synthetic_customer_churn_100k.csv")
+df
+df.shape
+df.isnull().sum()
+df.duplicated().sum()
+sns.countplot(df['Churn'])
+df['Churn'].value_counts()
+churned = df[df.Churn == 'Yes'].shape[0]
+retained = df[df.Churn == 'No'].shape[0]
+# Customer Left the company
+ch_per = ((churned/(churned + retained)) * 100)
+ch_per
+# Customer Stayed the company 
+re_per = ((retained/(churned + retained))*100)
+re_per
+df.describe()
+<h1>Visualization</h1>
+
+df.head(4)
+sns.countplot(x='Gender', hue='Churn', data=df)
+df['Gender'].value_counts()
+sns.histplot(data=df, x="Tenure", hue="Churn", bins=30)
+sns.boxplot(x="MonthlyCharges",hue="Churn" ,data=df)
+sns.countplot(x='PaymentMethod', hue='Churn',data=df)
+df.head(5)
+sns.countplot(x='Contract', hue='Churn',data=df)
+<h1>Data Preprocessing</h1>
+# Drop Customer ID and Age
+data = df.drop(['CustomerID','Age'], axis=1)
+data.head(5)
+data.shape
+<h1>Label Encoding</h1>
+from sklearn.preprocessing import LabelEncoder
+for column in data.columns:
+    if data[column].dtype == 'object':
+        data[column] = LabelEncoder().fit_transform(data[column])
+data
+<h1>Train and Test Data</h1>
+x = data.drop('Churn', axis=1)
+y = data['Churn']
+y
+<h1>Scalling the data</h1>
+from sklearn.preprocessing import StandardScaler
+feature_x = StandardScaler().fit_transform(x)
+feature_x
+<h1>Split Data</h1>
+from sklearn.model_selection import train_test_split
+xtrain, xtest , ytrain, ytest = train_test_split(feature_x,y, test_size=0.25, random_state=42)
+xtest
+<h1>Logistic Regression Model</h1>
+from sklearn.linear_model import LogisticRegression
+model = LogisticRegression()
+model.fit(xtrain,ytrain)
+pred = model.predict(xtest)
+pred.shape
+<h1>Performance Metics</h1>
+from sklearn.metrics import accuracy_score
+# accuracy score
+accuracy_score(ytest,pred)
+# confussion metrics
+from sklearn.metrics import confusion_matrix
+confusion_matrix(ytest,pred)
+# classification report
+from sklearn.metrics import classification_report
+print(classification_report(ytest,pred))
+<h1>Decission Tree</h1>
+from sklearn.tree import DecisionTreeClassifier
+
+dt = DecisionTreeClassifier()
+dt.fit(xtrain,ytrain)
+
+pred_dt = dt.predict(xtest)
+
+accuracy_score(ytest,pred_dt)
+<h1>Random Forest</h1>
+from sklearn.ensemble import RandomForestClassifier
+
+rf = RandomForestClassifier()
+
+rf.fit(xtrain,ytrain)
+
+pred_rf = rf.predict(xtest)
+
+accuracy_score(ytest,pred_rf)
+<h1>KNN</h1>
+from sklearn.neighbors import KNeighborsClassifier
+
+knn = KNeighborsClassifier()
+
+knn.fit(xtrain,ytrain)
+
+pred_knn = knn.predict(xtest)
+
+accuracy_score(ytest,pred_knn)
+<h1>Naive Base</h1>
+from sklearn.naive_bayes import GaussianNB
+
+nb = GaussianNB()
+
+nb.fit(xtrain,ytrain)
+
+pred_nb = nb.predict(xtest)
+
+accuracy_score(ytest,pred_nb)
+<h1>Final View</h1>
+models = pd.DataFrame({
+    'Model':['Logistic Regression','Decision Tree','Random Forest','KNN','Naive Bayes'],
+    'Accuracy':[
+        accuracy_score(ytest,pred),
+        accuracy_score(ytest,pred_dt),
+        accuracy_score(ytest,pred_rf),
+        accuracy_score(ytest,pred_knn),
+        accuracy_score(ytest,pred_nb)
+    ]
+})
+
+models
+<h1>Accuracy Graph:</h1>
+sns.barplot(x='Model', y='Accuracy', data=models)
+plt.xticks(rotation=45)
+plt.show()
+<h1>Conclusion:</h1>
+In this dataset, Naive Bayes achieved the highest accuracy (73.36%).
+
+Logistic Regression, Random Forest, and KNN produced almost similar results.
+
+The performance of Decision Tree was lower compared to the other models.
+
+Feature importance analysis from Random Forest shows which features have the most impact on churn prediction.
+
+With hyperparameter tuning, Random Forest could potentially achieve even better performance in the future.
