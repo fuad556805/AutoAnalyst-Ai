@@ -434,7 +434,6 @@ def generate_pdf_report(meta: dict, dataset_name: str, ml_results: list,
                 ts.add('TEXTCOLOR',  (0, i), (-1, i), colors.HexColor('#14532d'))
                 ts.add('FONTNAME',   (0, i), (-1, i), 'Helvetica-Bold')
         story.append(r_t)
-        story.append(muted)
 
     story.append(PageBreak())
 
