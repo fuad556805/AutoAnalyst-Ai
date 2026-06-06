@@ -4,43 +4,61 @@
 
 <div class="sidebar-layout">
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-        <div style="width:24px;height:24px;background:var(--black);border-radius:5px;display:flex;align-items:center;justify-content:center;">
-          <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
-            <rect x="1" y="1" width="6" height="6" rx="1" fill="white"/>
-            <rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-            <rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-            <rect x="9" y="9" width="6" height="6" rx="1" fill="white"/>
-          </svg>
-        </div>
-        <span class="sb-name">AutoAnalyst</span>
+    <a href="{% url 'home' %}" class="sidebar-brand">
+      <div class="sb-logo-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
+        </svg>
       </div>
-      <span class="sb-sub">AI Platform</span>
-    </div>
+      <div class="sb-text">
+        <div class="sb-name">AutoAnalyst</div>
+        <div class="sb-sub">AI Platform</div>
+      </div>
+    </a>
     <ul class="sidebar-nav">
       <li><a href="{% url 'home' %}"><span class="nav-icon">⊞</span> Dashboard</a></li>
       <li><a href="{% url 'upload' %}" class="active"><span class="nav-icon">↑</span> Upload Data</a></li>
-      <li><a href="{% url 'preview' %}"><span class="nav-icon">⊡</span> Preview</a></li>
+      <li><a href="{% url 'preview' %}"><span class="nav-icon">◫</span> Preview</a></li>
       <li><a href="{% url 'select_target' %}"><span class="nav-icon">◎</span> Select Target</a></li>
       <li><a href="{% url 'results' %}"><span class="nav-icon">▤</span> Results</a></li>
       <li><a href="{% url 'predict' %}"><span class="nav-icon">⚡</span> Predict</a></li>
     </ul>
   </aside>
 
-  <div class="sidebar-content">
+  <div class="page-content">
     <div class="page-header">
       <h1>Upload Dataset</h1>
       <p>Initialize a new machine learning pipeline with your raw data.</p>
     </div>
 
     <div class="progress-track mb-32">
-      <div class="progress-step active"><div class="progress-step-circle">1</div><div class="progress-step-label">Upload</div></div>
-      <div class="progress-step"><div class="progress-step-circle">2</div><div class="progress-step-label">Preview</div></div>
-      <div class="progress-step"><div class="progress-step-circle">3</div><div class="progress-step-label">Target</div></div>
-      <div class="progress-step"><div class="progress-step-circle">4</div><div class="progress-step-label">Train</div></div>
-      <div class="progress-step"><div class="progress-step-circle">5</div><div class="progress-step-label">Results</div></div>
-      <div class="progress-step"><div class="progress-step-circle">6</div><div class="progress-step-label">Predict</div></div>
+      <div class="progress-step active">
+        <div class="progress-step-dot">1</div>
+        <div class="progress-step-label">Upload</div>
+      </div>
+      <div class="progress-step">
+        <div class="progress-step-dot">2</div>
+        <div class="progress-step-label">Preview</div>
+      </div>
+      <div class="progress-step">
+        <div class="progress-step-dot">3</div>
+        <div class="progress-step-label">Target</div>
+      </div>
+      <div class="progress-step">
+        <div class="progress-step-dot">4</div>
+        <div class="progress-step-label">Train</div>
+      </div>
+      <div class="progress-step">
+        <div class="progress-step-dot">5</div>
+        <div class="progress-step-label">Results</div>
+      </div>
+      <div class="progress-step">
+        <div class="progress-step-dot">6</div>
+        <div class="progress-step-label">Predict</div>
+      </div>
     </div>
 
     <form method="post" enctype="multipart/form-data" id="upload-form">
@@ -48,15 +66,15 @@
       <input type="file" id="dataset-file" name="dataset" accept=".csv,.xlsx,.xls" class="hidden">
       <div class="upload-zone" id="upload-zone">
         <div class="upload-zone-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
         </div>
-        <h3>Drag &amp; Drop</h3>
-        <p>or click to browse from your computer</p>
-        <span class="formats">Supported formats: CSV, XLSX</span>
+        <h3>Drag &amp; Drop your file here</h3>
+        <p class="sub">or click anywhere in this area to browse</p>
+        <span class="formats">CSV &nbsp;·&nbsp; XLSX</span>
         <p class="upload-filename" id="upload-filename"></p>
       </div>
     </form>

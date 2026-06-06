@@ -9,6 +9,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.replit.dev',
+    'https://*.replit.app',
+    'https://*.pike.replit.dev',
+    'https://*.repl.co',
+]
+
+X_FRAME_OPTIONS = 'ALLOWALL'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

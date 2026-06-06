@@ -5,34 +5,36 @@
   <div class="auth-card">
     <div class="auth-logo">
       <div class="auth-logo-icon">
-        <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
-          <rect x="1" y="1" width="6" height="6" rx="1" fill="white"/>
-          <rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-          <rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-          <rect x="9" y="9" width="6" height="6" rx="1" fill="white"/>
+        <svg viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
         </svg>
       </div>
-      <span class="auth-logo-text">AutoAnalyst AI</span>
+      <span class="auth-logo-name">AutoAnalyst AI</span>
     </div>
     <h1 class="auth-title">Welcome back</h1>
-    <p class="auth-subtitle">Sign in to your account to continue.</p>
+    <p class="auth-subtitle">Sign in to continue to your workspace.</p>
     <form method="post">
       {% csrf_token %}
       <div class="form-group">
         <label for="id_username">Username</label>
-        <input type="text" name="username" id="id_username" placeholder="Enter username" autocomplete="username" required>
+        <input type="text" name="username" id="id_username" placeholder="Enter your username" autocomplete="username" required>
       </div>
       <div class="form-group">
         <label for="id_password">Password</label>
-        <input type="password" name="password" id="id_password" placeholder="Enter password" autocomplete="current-password" required>
+        <input type="password" name="password" id="id_password" placeholder="Enter your password" autocomplete="current-password" required>
       </div>
       {% if form.errors %}
-      <p style="color:var(--error);font-size:0.8375rem;margin-bottom:14px;font-weight:500;">Invalid username or password.</p>
+      <p style="color:var(--error);font-size:13px;margin-bottom:14px;font-weight:500;background:var(--error-bg);padding:10px 14px;border-radius:var(--radius);border:1px solid var(--error-border);">
+        ⚠ Invalid username or password.
+      </p>
       {% endif %}
-      <button type="submit" class="btn btn-primary btn-md" style="width:100%;margin-top:4px;">Sign In →</button>
+      <button type="submit" class="btn btn-primary btn-md" style="width:100%;margin-top:8px;justify-content:center;">Sign In →</button>
     </form>
-    <div class="auth-footer">
-      Don't have an account? <a href="{% url 'signup' %}">Sign Up</a>
+    <div class="auth-footer mt-20">
+      Don't have an account? <a href="{% url 'signup' %}">Create one free</a>
     </div>
   </div>
 </div>

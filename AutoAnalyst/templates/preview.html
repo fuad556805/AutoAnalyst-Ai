@@ -5,43 +5,43 @@
 
 <div class="sidebar-layout">
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-        <div style="width:24px;height:24px;background:var(--black);border-radius:5px;display:flex;align-items:center;justify-content:center;">
-          <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
-            <rect x="1" y="1" width="6" height="6" rx="1" fill="white"/>
-            <rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-            <rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-            <rect x="9" y="9" width="6" height="6" rx="1" fill="white"/>
-          </svg>
-        </div>
-        <span class="sb-name">AutoAnalyst</span>
+    <a href="{% url 'home' %}" class="sidebar-brand">
+      <div class="sb-logo-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
+        </svg>
       </div>
-      <span class="sb-sub">AI Platform</span>
-    </div>
+      <div class="sb-text">
+        <div class="sb-name">AutoAnalyst</div>
+        <div class="sb-sub">AI Platform</div>
+      </div>
+    </a>
     <ul class="sidebar-nav">
       <li><a href="{% url 'home' %}"><span class="nav-icon">⊞</span> Dashboard</a></li>
       <li><a href="{% url 'upload' %}"><span class="nav-icon">↑</span> Upload Data</a></li>
-      <li><a href="{% url 'preview' %}" class="active"><span class="nav-icon">⊡</span> Preview</a></li>
+      <li><a href="{% url 'preview' %}" class="active"><span class="nav-icon">◫</span> Preview</a></li>
       <li><a href="{% url 'select_target' %}"><span class="nav-icon">◎</span> Select Target</a></li>
       <li><a href="{% url 'results' %}"><span class="nav-icon">▤</span> Results</a></li>
       <li><a href="{% url 'predict' %}"><span class="nav-icon">⚡</span> Predict</a></li>
     </ul>
   </aside>
 
-  <div class="sidebar-content">
+  <div class="page-content">
     <div class="page-header">
       <h1>Dataset Preview</h1>
       <p>{{ dataset_name }}</p>
     </div>
 
     <div class="progress-track mb-32">
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Upload</div></div>
-      <div class="progress-step active"><div class="progress-step-circle">2</div><div class="progress-step-label">Preview</div></div>
-      <div class="progress-step"><div class="progress-step-circle">3</div><div class="progress-step-label">Target</div></div>
-      <div class="progress-step"><div class="progress-step-circle">4</div><div class="progress-step-label">Train</div></div>
-      <div class="progress-step"><div class="progress-step-circle">5</div><div class="progress-step-label">Results</div></div>
-      <div class="progress-step"><div class="progress-step-circle">6</div><div class="progress-step-label">Predict</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Upload</div></div>
+      <div class="progress-step active"><div class="progress-step-dot">2</div><div class="progress-step-label">Preview</div></div>
+      <div class="progress-step"><div class="progress-step-dot">3</div><div class="progress-step-label">Target</div></div>
+      <div class="progress-step"><div class="progress-step-dot">4</div><div class="progress-step-label">Train</div></div>
+      <div class="progress-step"><div class="progress-step-dot">5</div><div class="progress-step-label">Results</div></div>
+      <div class="progress-step"><div class="progress-step-dot">6</div><div class="progress-step-label">Predict</div></div>
     </div>
 
     <div class="stats-grid">
@@ -59,11 +59,11 @@
       </div>
     </div>
 
-    <div class="card mb-24">
+    <div class="card mb-20">
       <div class="card-header">
         <div>
           <div class="card-title">Column Profiling</div>
-          <div class="card-subtitle">Data types, missing values, and statistics per column</div>
+          <div class="card-subtitle">Data types, missing values, and basic statistics per column</div>
         </div>
       </div>
       <div class="table-wrap">
@@ -82,8 +82,8 @@
           <tbody>
             {% for stat in col_stats %}
             <tr>
-              <td><strong>{{ stat.name }}</strong></td>
-              <td><span class="badge badge-gray font-mono">{{ stat.dtype }}</span></td>
+              <td><strong style="color:var(--black)">{{ stat.name }}</strong></td>
+              <td><span class="badge badge-gray" style="font-family:monospace">{{ stat.dtype }}</span></td>
               <td>
                 {% if stat.missing > 0 %}
                   <span class="badge badge-yellow">{{ stat.missing }} ({{ stat.missing_pct }}%)</span>
@@ -91,7 +91,7 @@
                   <span class="badge badge-green">None</span>
                 {% endif %}
               </td>
-              <td class="font-mono">{{ stat.unique }}</td>
+              <td>{{ stat.unique }}</td>
               <td class="text-muted">{{ stat.min }}</td>
               <td class="text-muted">{{ stat.max }}</td>
               <td class="text-muted">{{ stat.mean }}</td>
@@ -104,7 +104,8 @@
 
     <div class="card mb-24">
       <div class="card-header">
-        <div class="card-title">Data Preview <span class="badge badge-gray" style="margin-left:8px;">First 10 rows</span></div>
+        <div class="card-title">Data Preview</div>
+        <span class="badge badge-gray">First 10 rows</span>
       </div>
       <div class="table-wrap">
         <table>

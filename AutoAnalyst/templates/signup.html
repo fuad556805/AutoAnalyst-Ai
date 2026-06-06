@@ -5,14 +5,14 @@
   <div class="auth-card">
     <div class="auth-logo">
       <div class="auth-logo-icon">
-        <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
-          <rect x="1" y="1" width="6" height="6" rx="1" fill="white"/>
-          <rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-          <rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-          <rect x="9" y="9" width="6" height="6" rx="1" fill="white"/>
+        <svg viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
         </svg>
       </div>
-      <span class="auth-logo-text">AutoAnalyst AI</span>
+      <span class="auth-logo-name">AutoAnalyst AI</span>
     </div>
     <h1 class="auth-title">Create account</h1>
     <p class="auth-subtitle">Start analyzing your data with AutoAnalyst.</p>
@@ -25,14 +25,22 @@
       <div class="form-group">
         <label for="id_password1">Password</label>
         <input type="password" name="password1" id="id_password1" placeholder="Create a password" required>
+        <div class="hint">Minimum 8 characters.</div>
       </div>
       <div class="form-group">
         <label for="id_password2">Confirm Password</label>
         <input type="password" name="password2" id="id_password2" placeholder="Confirm your password" required>
       </div>
-      <button type="submit" class="btn btn-primary btn-md" style="width:100%;margin-top:4px;">Create Account →</button>
+      {% if messages %}
+      {% for message in messages %}
+      {% if message.tags == 'error' %}
+      <p style="color:var(--error);font-size:13px;margin-bottom:14px;font-weight:500;background:var(--error-bg);padding:10px 14px;border-radius:var(--radius);border:1px solid var(--error-border);">⚠ {{ message }}</p>
+      {% endif %}
+      {% endfor %}
+      {% endif %}
+      <button type="submit" class="btn btn-primary btn-md" style="width:100%;margin-top:8px;justify-content:center;">Create Account →</button>
     </form>
-    <div class="auth-footer">
+    <div class="auth-footer mt-20">
       Already have an account? <a href="{% url 'login' %}">Sign In</a>
     </div>
   </div>

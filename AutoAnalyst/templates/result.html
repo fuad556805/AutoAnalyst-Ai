@@ -4,73 +4,79 @@
 
 <div class="sidebar-layout">
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-        <div style="width:24px;height:24px;background:var(--black);border-radius:5px;display:flex;align-items:center;justify-content:center;">
-          <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
-            <rect x="1" y="1" width="6" height="6" rx="1" fill="white"/>
-            <rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-            <rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-            <rect x="9" y="9" width="6" height="6" rx="1" fill="white"/>
-          </svg>
-        </div>
-        <span class="sb-name">AutoAnalyst</span>
+    <a href="{% url 'home' %}" class="sidebar-brand">
+      <div class="sb-logo-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
+        </svg>
       </div>
-      <span class="sb-sub">AI Platform</span>
-    </div>
+      <div class="sb-text">
+        <div class="sb-name">AutoAnalyst</div>
+        <div class="sb-sub">AI Platform</div>
+      </div>
+    </a>
     <ul class="sidebar-nav">
       <li><a href="{% url 'home' %}"><span class="nav-icon">⊞</span> Dashboard</a></li>
       <li><a href="{% url 'upload' %}"><span class="nav-icon">↑</span> Upload Data</a></li>
-      <li><a href="{% url 'preview' %}"><span class="nav-icon">⊡</span> Preview</a></li>
+      <li><a href="{% url 'preview' %}"><span class="nav-icon">◫</span> Preview</a></li>
       <li><a href="{% url 'select_target' %}"><span class="nav-icon">◎</span> Select Target</a></li>
       <li><a href="{% url 'results' %}" class="active"><span class="nav-icon">▤</span> Results</a></li>
       <li><a href="{% url 'predict' %}"><span class="nav-icon">⚡</span> Predict</a></li>
     </ul>
   </aside>
 
-  <div class="sidebar-content">
+  <div class="page-content">
     <div class="page-header">
       <h1>Training Results</h1>
-      <p>{{ dataset_name }} &bull; Target: <strong>{{ target }}</strong> &bull; <span class="badge badge-black" style="font-size:0.7rem;">{{ problem_type }}</span></p>
+      <p>
+        {{ dataset_name }} &nbsp;·&nbsp;
+        Target: <strong>{{ target }}</strong> &nbsp;·&nbsp;
+        <span class="badge badge-black">{{ problem_type }}</span>
+      </p>
     </div>
 
     <div class="progress-track mb-32">
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Upload</div></div>
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Preview</div></div>
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Target</div></div>
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Train</div></div>
-      <div class="progress-step active"><div class="progress-step-circle">5</div><div class="progress-step-label">Results</div></div>
-      <div class="progress-step"><div class="progress-step-circle">6</div><div class="progress-step-label">Predict</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Upload</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Preview</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Target</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Train</div></div>
+      <div class="progress-step active"><div class="progress-step-dot">5</div><div class="progress-step-label">Results</div></div>
+      <div class="progress-step"><div class="progress-step-dot">6</div><div class="progress-step-label">Predict</div></div>
     </div>
 
-    <!-- Best Model Banner -->
-    <div style="border:1.5px solid var(--black);border-radius:var(--radius-lg);padding:24px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
-      <div>
-        <div style="font-size:0.6875rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;color:var(--muted2);margin-bottom:6px;">Best Model</div>
-        <div style="font-family:'Space Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--black);">{{ best_model }}</div>
-        <div style="font-size:0.8125rem;color:var(--muted);margin-top:3px;">{{ metric_label }}</div>
+    <!-- Best model banner -->
+    <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px;background:var(--black);border-radius:var(--radius-lg);padding:24px 28px;margin-bottom:24px;position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 0% 50%,rgba(255,255,255,0.05) 0%,transparent 60%);"></div>
+      <div style="position:relative;">
+        <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,0.45);margin-bottom:8px;">🏆 Best Performing Model</div>
+        <div style="font-size:20px;font-weight:700;color:white;letter-spacing:-0.4px;margin-bottom:4px;">{{ best_model }}</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);">{{ metric_label }} &nbsp;·&nbsp; {{ problem_type }}</div>
       </div>
       {% for r in results %}{% if r.name == best_model %}
-      <div style="text-align:right;">
-        <div style="font-family:'Space Mono',monospace;font-size:2.5rem;font-weight:700;color:var(--success);line-height:1;">{{ r.score }}%</div>
+      <div style="position:relative;text-align:right;">
+        <div style="font-size:42px;font-weight:800;color:#4ade80;letter-spacing:-2px;line-height:1;">{{ r.score }}%</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">{{ metric_label }}</div>
       </div>
       {% endif %}{% endfor %}
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
       <!-- Model Comparison -->
       <div class="card">
         <div class="card-header">
           <div>
             <div class="card-title">Model Comparison</div>
-            <div class="card-subtitle">All models by {{ metric_label }}</div>
+            <div class="card-subtitle">All trained models ranked by {{ metric_label }}</div>
           </div>
         </div>
         {% for r in results %}
         <div class="model-card {% if r.name == best_model %}best{% endif %}">
           <div class="model-card-left">
             <div class="model-name">{{ r.name }}</div>
-            {% if r.name == best_model %}<div class="model-type" style="color:var(--success);">Best model ★</div>{% endif %}
+            <div class="model-meta">{% if r.name == best_model %}Best model · {% endif %}{{ metric_label }}</div>
           </div>
           <div class="score-bar">
             <div class="score-bar-fill" data-width="{{ r.score }}" style="width:0%"></div>
@@ -86,7 +92,7 @@
         <div class="card-header">
           <div>
             <div class="card-title">Feature Importance</div>
-            <div class="card-subtitle">Top drivers of prediction</div>
+            <div class="card-subtitle">Top drivers from {{ best_model }}</div>
           </div>
         </div>
         {% with max_val=feature_importance.0.importance %}
@@ -107,17 +113,27 @@
     <!-- Summary table -->
     <div class="card mb-24">
       <div class="card-header">
-        <div class="card-title">Run Summary</div>
+        <div class="card-title">Full Run Summary</div>
+        <span class="badge badge-gray">{{ results|length }} models</span>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Model</th><th>{{ metric_label }}</th><th>Rank</th></tr></thead>
+          <thead>
+            <tr><th>#</th><th>Model</th><th>{{ metric_label }}</th><th>Status</th></tr>
+          </thead>
           <tbody>
             {% for r in results %}
             <tr>
-              <td><strong>{{ r.name }}</strong> {% if r.name == best_model %}<span class="badge badge-black" style="margin-left:6px;">Best</span>{% endif %}</td>
-              <td class="font-mono">{{ r.score }}%</td>
-              <td class="font-mono text-muted">#{{ forloop.counter }}</td>
+              <td style="color:var(--muted2);font-weight:600;">{{ forloop.counter }}</td>
+              <td><strong>{{ r.name }}</strong></td>
+              <td><strong style="color:var(--black)">{{ r.score }}%</strong></td>
+              <td>
+                {% if r.name == best_model %}
+                  <span class="badge badge-green">✓ Best</span>
+                {% else %}
+                  <span class="badge badge-gray">Trained</span>
+                {% endif %}
+              </td>
             </tr>
             {% endfor %}
           </tbody>

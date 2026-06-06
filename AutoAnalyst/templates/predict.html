@@ -5,43 +5,47 @@
 
 <div class="sidebar-layout">
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-        <div style="width:24px;height:24px;background:var(--black);border-radius:5px;display:flex;align-items:center;justify-content:center;">
-          <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
-            <rect x="1" y="1" width="6" height="6" rx="1" fill="white"/>
-            <rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-            <rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-            <rect x="9" y="9" width="6" height="6" rx="1" fill="white"/>
-          </svg>
-        </div>
-        <span class="sb-name">AutoAnalyst</span>
+    <a href="{% url 'home' %}" class="sidebar-brand">
+      <div class="sb-logo-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
+        </svg>
       </div>
-      <span class="sb-sub">AI Platform</span>
-    </div>
+      <div class="sb-text">
+        <div class="sb-name">AutoAnalyst</div>
+        <div class="sb-sub">AI Platform</div>
+      </div>
+    </a>
     <ul class="sidebar-nav">
       <li><a href="{% url 'home' %}"><span class="nav-icon">⊞</span> Dashboard</a></li>
       <li><a href="{% url 'upload' %}"><span class="nav-icon">↑</span> Upload Data</a></li>
-      <li><a href="{% url 'preview' %}"><span class="nav-icon">⊡</span> Preview</a></li>
+      <li><a href="{% url 'preview' %}"><span class="nav-icon">◫</span> Preview</a></li>
       <li><a href="{% url 'select_target' %}"><span class="nav-icon">◎</span> Select Target</a></li>
       <li><a href="{% url 'results' %}"><span class="nav-icon">▤</span> Results</a></li>
       <li><a href="{% url 'predict' %}" class="active"><span class="nav-icon">⚡</span> Predict</a></li>
     </ul>
   </aside>
 
-  <div class="sidebar-content">
+  <div class="page-content">
     <div class="page-header">
       <h1>Make a Prediction</h1>
-      <p>Model: <strong>{{ best_model_name }}</strong> &bull; {{ metric_label }}: <strong style="color:var(--success)">{{ best_score }}%</strong></p>
+      <p>
+        Model: <strong>{{ best_model_name }}</strong>
+        &nbsp;·&nbsp;
+        {{ metric_label }}: <strong style="color:var(--success)">{{ best_score }}%</strong>
+      </p>
     </div>
 
     <div class="progress-track mb-32">
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Upload</div></div>
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Preview</div></div>
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Target</div></div>
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Train</div></div>
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Results</div></div>
-      <div class="progress-step active"><div class="progress-step-circle">6</div><div class="progress-step-label">Predict</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Upload</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Preview</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Target</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Train</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Results</div></div>
+      <div class="progress-step active"><div class="progress-step-dot">6</div><div class="progress-step-label">Predict</div></div>
     </div>
 
     {% if prediction_result %}
@@ -49,14 +53,14 @@
       <div class="prediction-label">{{ prediction_result.label }}</div>
       <div class="prediction-value">{{ prediction_result.value }}</div>
     </div>
-    <div class="explanation mb-24">
+    <div class="explanation">
       💡 {{ prediction_result.explanation|safe }}
     </div>
     {% endif %}
 
     {% if error_msg %}
-    <div class="card mb-20" style="border-color:var(--error);">
-      <p style="color:var(--error);font-size:0.875rem;font-weight:500;">⚠ Prediction error: {{ error_msg }}</p>
+    <div class="card mb-20" style="border-color:var(--error);background:var(--error-bg);">
+      <p style="color:var(--error);font-size:13.5px;font-weight:500;">⚠ Prediction error: {{ error_msg }}</p>
     </div>
     {% endif %}
 
@@ -66,8 +70,9 @@
         <div class="card-header">
           <div>
             <div class="card-title">Input Features</div>
-            <div class="card-subtitle">Enter values for each feature to get a prediction</div>
+            <div class="card-subtitle">Enter values for each feature. Leave blank to use 0.</div>
           </div>
+          <span class="badge badge-gray">{{ feature_names|length }} features</span>
         </div>
         <div class="predict-grid">
           {% for feat in feature_names %}
@@ -79,9 +84,10 @@
           {% endfor %}
         </div>
       </div>
+
       <div class="flex gap-12 mb-32">
         <a href="{% url 'results' %}" class="btn btn-outline btn-md">← Results</a>
-        <button type="submit" class="btn btn-primary btn-md">⚡ Predict Now</button>
+        <button type="submit" class="btn btn-primary btn-md">⚡ Run Prediction</button>
         <a href="{% url 'download_model' %}" class="btn btn-ghost btn-md">↓ Download Model</a>
       </div>
     </form>

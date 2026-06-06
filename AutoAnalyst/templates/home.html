@@ -4,7 +4,11 @@
 
 <section class="hero">
   <div class="container">
-    <h1>Transform Raw Data<br>Into AI Predictions</h1>
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      AutoML powered by scikit-learn
+    </div>
+    <h1>Transform Raw Data<br><em>Into AI Predictions</em></h1>
     <p>A precision instrument for automated data profiling, feature engineering, and model training. Upload a spreadsheet, get a trained model.</p>
     <div class="hero-actions">
       <a href="{% url 'upload' %}" class="btn btn-primary btn-xl">Upload Dataset →</a>
@@ -34,82 +38,88 @@
 
 <div class="container">
   <div id="pipeline" class="section-head">
-    <h2>The Pipeline</h2>
+    <div class="section-tag">How It Works</div>
+    <h2>Three steps to a trained model</h2>
   </div>
 
-  <div class="pipeline-grid" style="border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 48px;">
+  <div class="pipeline-grid">
     <div class="pipeline-card">
       <div class="pipeline-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
           <ellipse cx="12" cy="5" rx="9" ry="3"/>
           <path d="M3 5v14a9 3 0 0018 0V5"/>
           <path d="M3 12a9 3 0 0018 0"/>
         </svg>
       </div>
       <h3>1. Profile &amp; Detect</h3>
-      <p>Automatically analyzes schema, missing values, distributions, and suggests target variables.</p>
+      <p>Automatically analyzes schema, missing values, distributions, and suggests target variables for prediction.</p>
     </div>
     <div class="pipeline-card">
       <div class="pipeline-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
           <line x1="8" y1="2" x2="8" y2="18"/>
           <line x1="16" y1="6" x2="16" y2="22"/>
         </svg>
       </div>
       <h3>2. Preprocess &amp; Train</h3>
-      <p>Handles imputation, encoding, scaling, and trains multiple algorithms (Random Forest, SVM, etc).</p>
+      <p>Handles imputation, encoding, scaling, and trains multiple algorithms — Random Forest, SVM, KNN, and more.</p>
     </div>
     <div class="pipeline-card">
       <div class="pipeline-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <circle cx="12" cy="12" r="6"/>
           <circle cx="12" cy="12" r="2"/>
         </svg>
       </div>
       <h3>3. Compare &amp; Predict</h3>
-      <p>Ranks models by performance metrics and provides a ready-to-use prediction interface.</p>
+      <p>Ranks models by performance metrics and provides a ready-to-use prediction interface with explanations.</p>
     </div>
+  </div>
+
+  <div class="section-head">
+    <div class="section-tag">Features</div>
+    <h2>Everything you need, nothing you don't</h2>
   </div>
 
   <div class="features-grid">
     <div class="feature-card">
       <div class="feature-icon">📊</div>
-      <h3>Auto Profiling</h3>
-      <p>Missing values, duplicates, data types, and statistics — analyzed instantly.</p>
+      <h3>Auto Data Profiling</h3>
+      <p>Missing values, duplicates, data types, and statistics — all analyzed instantly after upload.</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">🧹</div>
-      <h3>Smart Cleaning</h3>
-      <p>Auto-drops useless columns, imputes missing values, encodes categoricals.</p>
+      <h3>Smart Column Cleaning</h3>
+      <p>Auto-drops useless columns (>80% missing, constants, ID-like), imputes and encodes the rest.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <h3>Target Suggestion</h3>
+      <p>Ranks columns by suitability score and suggests the best candidates for your prediction target.</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">🧠</div>
       <h3>AutoML Training</h3>
-      <p>Trains 4 classification or 3 regression models and picks the winner.</p>
+      <p>Trains 4 classifiers or 3 regressors in parallel and selects the highest-performing model.</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">💡</div>
       <h3>Explainable AI</h3>
-      <p>Feature importance reveals which variables drive your model's decisions.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔮</div>
-      <h3>Live Prediction</h3>
-      <p>Enter values and get instant predictions from the trained best model.</p>
+      <p>Feature importance charts reveal which variables drive your model's predictions.</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">💾</div>
       <h3>Model Export</h3>
-      <p>Download the trained model as a joblib file for your own projects.</p>
+      <p>Download the trained model as a joblib file for deployment in your own production systems.</p>
     </div>
   </div>
 
-  <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 48px; text-align: center; margin-bottom: 60px;">
-    <h2 style="font-family:'Space Mono',monospace; font-size:1.5rem; font-weight:700; text-transform:uppercase; letter-spacing:-0.01em; margin-bottom:12px;">Ready to start?</h2>
-    <p style="color:var(--muted); margin-bottom:28px; font-size:0.9375rem;">Upload your CSV or XLSX dataset and let AutoAnalyst do the work.</p>
-    <a href="{% url 'upload' %}" class="btn btn-primary btn-lg">Upload Dataset →</a>
+  <div class="cta-section">
+    <h2>Ready to analyze your data?</h2>
+    <p>Upload a CSV or XLSX dataset and get a trained ML model in minutes.</p>
+    <a href="{% url 'upload' %}" class="btn btn-xl" style="background:white;color:#09090b;border:none;font-weight:700;">Upload Dataset →</a>
   </div>
 </div>
 

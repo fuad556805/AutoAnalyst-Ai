@@ -5,90 +5,93 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}AutoAnalyst AI{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23000'/><text y='.88em' font-size='70' x='14' fill='white'>⊞</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2309090b'/><rect x='5' y='5' width='9' height='9' rx='2' fill='white'/><rect x='18' y='5' width='9' height='9' rx='2' fill='white' opacity='.5'/><rect x='5' y='18' width='9' height='9' rx='2' fill='white' opacity='.5'/><rect x='18' y='18' width='9' height='9' rx='2' fill='white'/></svg>">
 </head>
 <body>
-  <nav class="navbar">
-    <a href="{% url 'home' %}" class="nav-brand">
-      <div class="nav-logo-icon">
-        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="1" width="6" height="6" rx="1" fill="white"/>
-          <rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-          <rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-          <rect x="9" y="9" width="6" height="6" rx="1" fill="white"/>
-        </svg>
-      </div>
-      <div class="nav-brand-text">
-        <span class="nav-brand-name">AutoAnalyst AI</span>
-        <span class="nav-brand-sub">AI Platform</span>
-      </div>
-    </a>
 
-    <ul class="nav-links">
-      <li><a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>Home</a></li>
-      <li><a href="{% url 'upload' %}" {% if request.resolver_match.url_name == 'upload' %}class="active"{% endif %}>Upload</a></li>
-      <li><a href="{% url 'results' %}" {% if request.resolver_match.url_name == 'results' %}class="active"{% endif %}>Results</a></li>
-      <li><a href="{% url 'predict' %}" {% if request.resolver_match.url_name == 'predict' %}class="active"{% endif %}>Predict</a></li>
-    </ul>
-
-    <div class="nav-auth">
-      {% if user.is_authenticated %}
-        <span class="text-muted text-sm">{{ user.username }}</span>
-        <a href="{% url 'logout' %}" class="btn btn-outline btn-sm">Sign Out</a>
-      {% else %}
-        <a href="{% url 'login' %}" class="btn btn-outline btn-sm">Sign In</a>
-        <a href="{% url 'upload' %}" class="btn btn-primary btn-sm">Upload Dataset</a>
-      {% endif %}
+<nav class="navbar">
+  <a href="{% url 'home' %}" class="nav-brand">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
+        <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+        <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+        <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
+      </svg>
     </div>
-
-    <div class="hamburger" id="hamburger">
-      <span></span><span></span><span></span>
+    <div class="nav-brand-text">
+      <span class="nav-brand-name">AutoAnalyst AI</span>
+      <span class="nav-brand-sub">AI Platform</span>
     </div>
-  </nav>
+  </a>
 
-  <nav class="nav-mobile" id="nav-mobile">
-    <a href="{% url 'home' %}">Home</a>
-    <a href="{% url 'upload' %}">Upload Dataset</a>
-    <a href="{% url 'results' %}">Results</a>
-    <a href="{% url 'predict' %}">Predict</a>
-    <hr class="divider">
+  <ul class="nav-links">
+    <li><a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>Home</a></li>
+    <li><a href="{% url 'upload' %}" {% if request.resolver_match.url_name == 'upload' %}class="active"{% endif %}>Upload</a></li>
+    <li><a href="{% url 'results' %}" {% if request.resolver_match.url_name == 'results' %}class="active"{% endif %}>Results</a></li>
+    <li><a href="{% url 'predict' %}" {% if request.resolver_match.url_name == 'predict' %}class="active"{% endif %}>Predict</a></li>
+  </ul>
+
+  <div class="nav-auth">
     {% if user.is_authenticated %}
-      <a href="{% url 'logout' %}">Sign Out</a>
+      <span class="text-muted text-sm">{{ user.username }}</span>
+      <a href="{% url 'logout' %}" class="btn btn-outline btn-sm">Sign Out</a>
     {% else %}
-      <a href="{% url 'login' %}">Sign In</a>
-      <a href="{% url 'signup' %}">Sign Up</a>
+      <a href="{% url 'login' %}" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="{% url 'upload' %}" class="btn btn-primary btn-sm">Upload Dataset</a>
     {% endif %}
-  </nav>
-
-  {% if messages %}
-  <div class="container">
-    <ul class="messages mt-16">
-      {% for message in messages %}
-        <li class="{{ message.tags }}">{{ message }}</li>
-      {% endfor %}
-    </ul>
   </div>
+
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<nav class="nav-mobile" id="nav-mobile">
+  <a href="{% url 'home' %}">Home</a>
+  <a href="{% url 'upload' %}">Upload Dataset</a>
+  <a href="{% url 'results' %}">Results</a>
+  <a href="{% url 'predict' %}">Predict</a>
+  <hr class="divider">
+  {% if user.is_authenticated %}
+    <a href="{% url 'logout' %}">Sign Out</a>
+  {% else %}
+    <a href="{% url 'login' %}">Sign In</a>
+    <a href="{% url 'signup' %}">Sign Up</a>
   {% endif %}
+</nav>
 
-  {% block content %}{% endblock %}
+{% if messages %}
+<div class="container">
+  <ul class="messages mt-16">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
 
-  <footer>
-    <div class="footer-brand">
-      <div class="f-icon">
-        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="1" width="6" height="6" rx="1" fill="white"/>
-          <rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-          <rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-          <rect x="9" y="9" width="6" height="6" rx="1" fill="white"/>
-        </svg>
-      </div>
-      <span>AutoAnalyst AI</span>
+{% block content %}{% endblock %}
+
+<footer>
+  <div class="footer-brand">
+    <div class="f-icon">
+      <svg viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
+        <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+        <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+        <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
+      </svg>
     </div>
-    <span>© 2026 AutoAnalyst AI. Transform raw data into predictions.</span>
-  </footer>
+    <span>AutoAnalyst AI</span>
+  </div>
+  <span>© 2026 AutoAnalyst AI. Transform raw data into predictions.</span>
+</footer>
 
-  <script src="{% static 'js/main.js' %}"></script>
-  {% block extra_js %}{% endblock %}
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

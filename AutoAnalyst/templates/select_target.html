@@ -4,43 +4,43 @@
 
 <div class="sidebar-layout">
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-        <div style="width:24px;height:24px;background:var(--black);border-radius:5px;display:flex;align-items:center;justify-content:center;">
-          <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
-            <rect x="1" y="1" width="6" height="6" rx="1" fill="white"/>
-            <rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-            <rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-            <rect x="9" y="9" width="6" height="6" rx="1" fill="white"/>
-          </svg>
-        </div>
-        <span class="sb-name">AutoAnalyst</span>
+    <a href="{% url 'home' %}" class="sidebar-brand">
+      <div class="sb-logo-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
+        </svg>
       </div>
-      <span class="sb-sub">AI Platform</span>
-    </div>
+      <div class="sb-text">
+        <div class="sb-name">AutoAnalyst</div>
+        <div class="sb-sub">AI Platform</div>
+      </div>
+    </a>
     <ul class="sidebar-nav">
       <li><a href="{% url 'home' %}"><span class="nav-icon">⊞</span> Dashboard</a></li>
       <li><a href="{% url 'upload' %}"><span class="nav-icon">↑</span> Upload Data</a></li>
-      <li><a href="{% url 'preview' %}"><span class="nav-icon">⊡</span> Preview</a></li>
+      <li><a href="{% url 'preview' %}"><span class="nav-icon">◫</span> Preview</a></li>
       <li><a href="{% url 'select_target' %}" class="active"><span class="nav-icon">◎</span> Select Target</a></li>
       <li><a href="{% url 'results' %}"><span class="nav-icon">▤</span> Results</a></li>
       <li><a href="{% url 'predict' %}"><span class="nav-icon">⚡</span> Predict</a></li>
     </ul>
   </aside>
 
-  <div class="sidebar-content">
+  <div class="page-content">
     <div class="page-header">
       <h1>Select Target Column</h1>
-      <p>Choose the column you want the model to predict.</p>
+      <p>Choose the column you want the model to learn to predict.</p>
     </div>
 
     <div class="progress-track mb-32">
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Upload</div></div>
-      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Preview</div></div>
-      <div class="progress-step active"><div class="progress-step-circle">3</div><div class="progress-step-label">Target</div></div>
-      <div class="progress-step"><div class="progress-step-circle">4</div><div class="progress-step-label">Train</div></div>
-      <div class="progress-step"><div class="progress-step-circle">5</div><div class="progress-step-label">Results</div></div>
-      <div class="progress-step"><div class="progress-step-circle">6</div><div class="progress-step-label">Predict</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Upload</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Preview</div></div>
+      <div class="progress-step active"><div class="progress-step-dot">3</div><div class="progress-step-label">Target</div></div>
+      <div class="progress-step"><div class="progress-step-dot">4</div><div class="progress-step-label">Train</div></div>
+      <div class="progress-step"><div class="progress-step-dot">5</div><div class="progress-step-label">Results</div></div>
+      <div class="progress-step"><div class="progress-step-dot">6</div><div class="progress-step-label">Predict</div></div>
     </div>
 
     <form method="post" id="train-form">
@@ -60,7 +60,7 @@
             <div class="radio-card-info">
               <h4>{{ col }}</h4>
               {% if col == suggested_target %}
-                <p>Suggested target — auto-detected</p>
+                <p>Suggested — auto-detected as best candidate</p>
               {% endif %}
             </div>
           </label>
@@ -69,11 +69,11 @@
       </div>
 
       <div class="info-box mb-24">
-        <div class="info-box-title">Auto Detection</div>
+        <div class="info-box-title">Auto Problem Detection</div>
         <ul>
-          <li>Numeric target with many values → Regression problem</li>
-          <li>Categorical or few unique values → Classification problem</li>
-          <li>Model type is detected automatically after you confirm</li>
+          <li>Numeric target with many distinct values → Regression</li>
+          <li>Categorical or few unique values (≤10) → Classification</li>
+          <li>Problem type is detected automatically after you confirm</li>
         </ul>
       </div>
 
@@ -88,7 +88,7 @@
 <div class="loading-overlay hidden" id="loading-overlay">
   <div class="spinner"></div>
   <h3>Training Models...</h3>
-  <p>This may take a few seconds. Please wait.</p>
+  <p>Preprocessing data and fitting all algorithms. Please wait.</p>
 </div>
 
 {% endblock %}
