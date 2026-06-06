@@ -530,8 +530,9 @@ body {
   inset: 0;
   background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.06) 0%, transparent 70%);
 }
-.cta-section h2 { font-size: 28px; font-weight: 800; color: var(--white); letter-spacing: -0.8px; margin-bottom: 10px; position: relative; }
-.cta-section p  { color: rgba(255,255,255,0.82); font-size: 15px; margin-bottom: 28px; position: relative; }
+.cta-section h2  { font-size: 28px; font-weight: 800; color: var(--white); letter-spacing: -0.8px; margin-bottom: 10px; position: relative; }
+.cta-section p   { color: rgba(255,255,255,0.82); font-size: 15px; margin-bottom: 28px; position: relative; }
+.cta-section .btn { position: relative; z-index: 1; }
 
 /* ── SIDEBAR LAYOUT ──────────────────────────────── */
 .sidebar-layout {
