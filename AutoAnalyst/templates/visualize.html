@@ -51,10 +51,16 @@
     <div class="card mb-24">
       <div class="card-header">
         <div><div class="card-title">{{ chart.title }}</div><div class="card-subtitle">Distribution of the target/label column</div></div>
-        <span class="badge badge-green">Target</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="badge badge-green">Target</span>
+          <button class="copy-chart-btn" data-img="{{ chart.img }}" title="Copy chart to clipboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
       </div>
       <img src="data:image/png;base64,{{ chart.img }}" alt="{{ chart.title }}"
-           style="width:100%;max-width:520px;border-radius:var(--radius);display:block;">
+           style="width:100%;max-width:560px;border-radius:var(--radius);display:block;">
     </div>
     {% endif %}{% endfor %}
 
@@ -63,10 +69,52 @@
     <div class="card mb-24">
       <div class="card-header">
         <div><div class="card-title">{{ chart.title }}</div><div class="card-subtitle">Pearson correlation between numeric features (−1 to +1)</div></div>
-        <span class="badge badge-blue">Heatmap</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="badge badge-blue">Heatmap</span>
+          <button class="copy-chart-btn" data-img="{{ chart.img }}" title="Copy chart to clipboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
       </div>
       <img src="data:image/png;base64,{{ chart.img }}" alt="{{ chart.title }}"
            style="width:100%;border-radius:var(--radius);display:block;">
+    </div>
+    {% endif %}{% endfor %}
+
+    <!-- Box plots (numeric vs target) -->
+    {% for chart in charts %}{% if chart.type == 'boxplot' %}
+    <div class="card mb-24">
+      <div class="card-header">
+        <div><div class="card-title">{{ chart.title }}</div><div class="card-subtitle">Distribution by target class — shows median, IQR, and outliers</div></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="badge badge-gray">Box Plot</span>
+          <button class="copy-chart-btn" data-img="{{ chart.img }}" title="Copy chart to clipboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+      </div>
+      <img src="data:image/png;base64,{{ chart.img }}" alt="{{ chart.title }}"
+           style="width:100%;border-radius:var(--radius);display:block;">
+    </div>
+    {% endif %}{% endfor %}
+
+    <!-- Pie charts -->
+    {% for chart in charts %}{% if chart.type == 'pie' %}
+    <div class="card mb-24">
+      <div class="card-header">
+        <div><div class="card-title">{{ chart.title }}</div><div class="card-subtitle">Category proportions</div></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="badge badge-gray">Pie</span>
+          <button class="copy-chart-btn" data-img="{{ chart.img }}" title="Copy chart to clipboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+      </div>
+      <img src="data:image/png;base64,{{ chart.img }}" alt="{{ chart.title }}"
+           style="width:100%;max-width:420px;border-radius:var(--radius);display:block;">
     </div>
     {% endif %}{% endfor %}
 
@@ -81,7 +129,12 @@
         <div class="viz-card">
           <div class="viz-card-head">
             <span class="viz-title">{{ chart.title }}</span>
-            <span class="badge badge-gray" style="font-size:10px;">{% if chart.type == 'histogram' %}numeric{% else %}categorical{% endif %}</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="badge badge-gray" style="font-size:10px;">{% if chart.type == 'histogram' %}numeric{% else %}categorical{% endif %}</span>
+              <button class="copy-chart-btn copy-chart-sm" data-img="{{ chart.img }}" title="Copy chart">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
           </div>
           <img src="data:image/png;base64,{{ chart.img }}" alt="{{ chart.title }}"
                style="width:100%;border-radius:var(--radius-sm);">
@@ -97,6 +150,8 @@
     {% endif %}
   </div>
 </div>
+
+<div id="copy-toast" class="copy-toast">✓ Chart copied to clipboard</div>
 
 <style>
 .viz-grid {
@@ -125,7 +180,86 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 160px;
+  max-width: 140px;
 }
+.copy-chart-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.copy-chart-btn:hover { background: var(--black); color: white; border-color: var(--black); }
+.copy-chart-sm { padding: 3px 6px; }
+.copy-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--black);
+  color: white;
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s;
+  z-index: 9999;
+}
+.copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
+
+<script>
+function copyChartToClipboard(b64, btn) {
+  const img = new Image();
+  img.onload = function() {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    canvas.getContext('2d').drawImage(img, 0, 0);
+    canvas.toBlob(function(blob) {
+      try {
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function() {
+          showToast();
+        }).catch(function() {
+          fallbackCopy(b64);
+        });
+      } catch(e) {
+        fallbackCopy(b64);
+      }
+    });
+  };
+  img.src = 'data:image/png;base64,' + b64;
+}
+
+function fallbackCopy(b64) {
+  const a = document.createElement('a');
+  a.href = 'data:image/png;base64,' + b64;
+  a.download = 'chart.png';
+  a.click();
+  showToast('✓ Chart downloaded');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('copy-toast');
+  if (msg) t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+document.querySelectorAll('.copy-chart-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    copyChartToClipboard(this.dataset.img, this);
+  });
+});
+</script>
 {% endblock %}

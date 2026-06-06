@@ -123,4 +123,89 @@
   </div>
 </div>
 
+<!-- Contact Section -->
+<section class="contact-section">
+  <div class="container">
+    <div class="contact-inner">
+      <div class="contact-info">
+        <div class="section-tag" style="color:rgba(255,255,255,0.5);border-color:rgba(255,255,255,0.15);">Contact Us</div>
+        <h2 style="color:white;margin-top:12px;">Get in Touch</h2>
+        <p style="color:rgba(255,255,255,0.6);max-width:400px;">Have questions, feedback, or need support? Reach out — we'd love to hear from you.</p>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div>
+          <div class="contact-label">Email</div>
+          <a href="mailto:fuad556805@gmail.com" class="contact-email">fuad556805@gmail.com</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.contact-section {
+  background: #09090b;
+  padding: 72px 0 80px;
+  margin-top: 0;
+}
+.contact-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+.contact-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 20px 28px;
+  min-width: 280px;
+  transition: background 0.2s;
+}
+.contact-card:hover { background: rgba(255,255,255,0.09); }
+.contact-icon {
+  width: 46px;
+  height: 46px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+.contact-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 4px;
+}
+.contact-email {
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  text-decoration: none;
+  letter-spacing: -0.2px;
+  transition: color 0.15s;
+}
+.contact-email:hover { color: rgba(255,255,255,0.7); }
+
+@media (max-width: 640px) {
+  .contact-inner { flex-direction: column; align-items: flex-start; }
+  .contact-card { width: 100%; }
+}
+</style>
+
 {% endblock %}
