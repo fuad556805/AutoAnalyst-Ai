@@ -11,6 +11,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('signup/', core_views.signup, name='signup'),
+    path('dashboard/', include('apps.dashboard.urls')),
     path('dataset/', include('apps.dataset.urls')),
     path('ml/', include('apps.ml.urls')),
     path('predict/', include('apps.predict.urls')),

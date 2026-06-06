@@ -1,0 +1,1 @@
+- [Dashboard & module architecture](dashboard-architecture.md) — Dashboard app uses DB models (Dataset, TrainingRun, Prediction) for per-user history; views save records when user.is_authenticated.

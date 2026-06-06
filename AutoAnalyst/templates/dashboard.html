@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard — AutoAnalyst AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="dash-header">
+    <div class="dash-header-left">
+      <div class="dash-avatar">{{ request.user.username|slice:":1"|upper }}</div>
+      <div>
+        <h1 class="dash-title">Welcome back, <span>{{ request.user.username }}</span></h1>
+        <p class="dash-subtitle">Your personal ML workspace overview</p>
+      </div>
+    </div>
+    <div class="dash-header-actions">
+      <a href="{% url 'upload' %}" class="btn btn-primary btn-sm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload Dataset
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Stats Cards ─────────────────────────────────────────────────────── -->
+  <div class="dash-stats">
+    <div class="dash-stat-card">
+      <div class="dash-stat-icon dash-stat-icon--datasets">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      </div>
+      <div class="dash-stat-body">
+        <div class="dash-stat-value">{{ total_datasets }}</div>
+        <div class="dash-stat-label">Datasets Uploaded</div>
+      </div>
+    </div>
+
+    <div class="dash-stat-card">
+      <div class="dash-stat-icon dash-stat-icon--models">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="dash-stat-body">
+        <div class="dash-stat-value">{{ total_training_runs }}</div>
+        <div class="dash-stat-label">Models Trained</div>
+      </div>
+    </div>
+
+    <div class="dash-stat-card">
+      <div class="dash-stat-icon dash-stat-icon--predictions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div class="dash-stat-body">
+        <div class="dash-stat-value">{{ total_predictions }}</div>
+        <div class="dash-stat-label">Predictions Made</div>
+      </div>
+    </div>
+
+    <div class="dash-stat-card">
+      <div class="dash-stat-icon dash-stat-icon--score">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <div class="dash-stat-body">
+        <div class="dash-stat-value">
+          {% if best_score %}{{ best_score|floatformat:1 }}%{% else %}—{% endif %}
+        </div>
+        <div class="dash-stat-label">Best Model Score</div>
+        {% if best_model %}<div class="dash-stat-sub">{{ best_model }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Problem Type Breakdown ──────────────────────────────────────────── -->
+  {% if total_training_runs > 0 %}
+  <div class="dash-breakdown">
+    <div class="dash-breakdown-item">
+      <span class="dash-breakdown-dot dash-breakdown-dot--clf"></span>
+      <span class="dash-breakdown-label">Classification</span>
+      <span class="dash-breakdown-count">{{ classification_count }}</span>
+    </div>
+    <div class="dash-breakdown-sep"></div>
+    <div class="dash-breakdown-item">
+      <span class="dash-breakdown-dot dash-breakdown-dot--reg"></span>
+      <span class="dash-breakdown-label">Regression</span>
+      <span class="dash-breakdown-count">{{ regression_count }}</span>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── Main Grid ───────────────────────────────────────────────────────── -->
+  <div class="dash-grid">
+
+    <!-- ── Datasets Section ──────────────────────────────────────────────── -->
+    <section class="dash-section dash-section--full">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          Datasets
+        </h2>
+        <a href="{% url 'upload' %}" class="dash-section-action">Upload new →</a>
+      </div>
+
+      {% if all_datasets %}
+      <div class="dash-table-wrap">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Rows</th>
+              <th>Columns</th>
+              <th>Size</th>
+              <th>Uploaded</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ds in all_datasets %}
+            <tr>
+              <td>
+                <div class="dash-cell-name">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  {{ ds.name }}
+                </div>
+              </td>
+              <td><span class="dash-badge">{{ ds.rows|default:"—" }}</span></td>
+              <td><span class="dash-badge">{{ ds.columns|default:"—" }}</span></td>
+              <td class="dash-muted">{{ ds.size_display }}</td>
+              <td class="dash-muted">{{ ds.uploaded_at|date:"M d, Y" }}</td>
+              <td>
+                <a href="{% url 'upload' %}" class="dash-action-link">Upload New</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="dash-empty">
+        <div class="dash-empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        </div>
+        <p class="dash-empty-text">No datasets uploaded yet.</p>
+        <a href="{% url 'upload' %}" class="btn btn-primary btn-sm">Upload your first dataset</a>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- ── Training History ───────────────────────────────────────────────── -->
+    <section class="dash-section dash-section--full">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Model Training History
+        </h2>
+        {% if recent_training_runs %}
+        <a href="{% url 'results' %}" class="dash-section-action">View last results →</a>
+        {% endif %}
+      </div>
+
+      {% if recent_training_runs %}
+      <div class="dash-table-wrap">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Dataset</th>
+              <th>Target</th>
+              <th>Type</th>
+              <th>Best Model</th>
+              <th>Score</th>
+              <th>Features</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for run in recent_training_runs %}
+            <tr>
+              <td class="dash-muted">{{ run.dataset_name|default:"—" }}</td>
+              <td>
+                <code class="dash-code">{{ run.target_column }}</code>
+              </td>
+              <td>
+                <span class="dash-pill dash-pill--{% if run.problem_type == 'classification' %}clf{% else %}reg{% endif %}">
+                  {{ run.problem_type_display }}
+                </span>
+              </td>
+              <td>{{ run.best_model_name }}</td>
+              <td>
+                <div class="dash-score-wrap">
+                  <span class="dash-score {% if run.best_score >= 80 %}dash-score--high{% elif run.best_score >= 60 %}dash-score--mid{% else %}dash-score--low{% endif %}">
+                    {{ run.best_score|floatformat:1 }}%
+                  </span>
+                  <div class="dash-score-bar">
+                    <div class="dash-score-fill" style="width: {{ run.best_score|floatformat:0 }}%"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="dash-muted">{{ run.n_features }}</td>
+              <td class="dash-muted">{{ run.trained_at|date:"M d, Y" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="dash-empty">
+        <div class="dash-empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <p class="dash-empty-text">No models trained yet.</p>
+        <a href="{% url 'upload' %}" class="btn btn-primary btn-sm">Start by uploading a dataset</a>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- ── Prediction History ─────────────────────────────────────────────── -->
+    <section class="dash-section dash-section--full">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Prediction History
+        </h2>
+        {% if recent_predictions %}
+        <a href="{% url 'predict' %}" class="dash-section-action">Make new prediction →</a>
+        {% endif %}
+      </div>
+
+      {% if recent_predictions %}
+      <div class="dash-table-wrap">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Target</th>
+              <th>Result</th>
+              <th>Input Features</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pred in recent_predictions %}
+            <tr>
+              <td class="dash-muted">{{ pred.model_name|default:"—" }}</td>
+              <td><code class="dash-code">{{ pred.target_column|default:"—" }}</code></td>
+              <td>
+                <span class="dash-result-value">{{ pred.result_value }}</span>
+              </td>
+              <td>
+                <div class="dash-inputs-preview">
+                  {% for key, val in pred.input_summary.items %}
+                  {% if forloop.counter <= 3 %}
+                  <span class="dash-input-chip"><strong>{{ key }}</strong>: {{ val }}</span>
+                  {% endif %}
+                  {% endfor %}
+                  {% if pred.input_summary.items|length > 3 %}
+                  <span class="dash-input-more">+{{ pred.input_summary.items|length|add:"-3" }} more</span>
+                  {% endif %}
+                </div>
+              </td>
+              <td class="dash-muted">{{ pred.predicted_at|date:"M d, Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="dash-empty">
+        <div class="dash-empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <p class="dash-empty-text">No predictions made yet.</p>
+        <a href="{% url 'predict' %}" class="btn btn-outline btn-sm">Go to Predictions</a>
+      </div>
+      {% endif %}
+    </section>
+
+  </div><!-- .dash-grid -->
+</div><!-- .dashboard-wrapper -->
+{% endblock %}
