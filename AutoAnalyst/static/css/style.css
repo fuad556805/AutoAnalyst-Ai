@@ -350,8 +350,8 @@ body {
 .btn-lg  { font-size: 14.5px;padding: 11px 22px;  border-radius: var(--radius-md); font-weight: 600; }
 .btn-xl  { font-size: 15px;  padding: 13px 28px;  border-radius: var(--radius-md); font-weight: 600; }
 
-.btn-primary  { background: var(--black); color: var(--white); border: 1px solid var(--black); }
-.btn-primary:hover  { background: #27272a; box-shadow: var(--shadow); transform: translateY(-1px); }
+.btn-primary  { background: #1e293b; color: var(--white); border: 1px solid #1e293b; }
+.btn-primary:hover  { background: #0f172a; box-shadow: var(--shadow); transform: translateY(-1px); }
 
 .btn-outline { background: var(--white); color: var(--text-2); border: 1px solid var(--border-strong); }
 .btn-outline:hover { background: var(--bg-muted); border-color: var(--border-strong); color: var(--text); }
@@ -516,7 +516,7 @@ body {
 
 /* ── CTA SECTION ─────────────────────────────────── */
 .cta-section {
-  background: var(--black);
+  background: #1e293b;
   border-radius: var(--radius-xl);
   padding: 52px 40px;
   text-align: center;
@@ -638,18 +638,18 @@ body {
   color: var(--muted);
 }
 .progress-step.done .progress-step-dot {
-  background: var(--black);
-  border-color: var(--black);
+  background: #1e293b;
+  border-color: #1e293b;
   color: var(--white);
   font-size: 13px;
 }
 .progress-step.active .progress-step-dot {
-  background: var(--black);
-  border-color: var(--black);
+  background: #1e293b;
+  border-color: #1e293b;
   color: var(--white);
-  box-shadow: 0 0 0 4px rgba(9,9,11,0.1);
+  box-shadow: 0 0 0 4px rgba(30,41,59,0.15);
 }
-.progress-step.done::after  { background: var(--black); }
+.progress-step.done::after  { background: #1e293b; }
 .progress-step-label {
   font-size: 10.5px;
   color: var(--muted2);
