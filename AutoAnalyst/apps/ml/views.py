@@ -2,6 +2,7 @@ import os
 import io
 import json
 import base64
+import datetime
 import pandas as pd
 import numpy as np
 from django.shortcuts import render, redirect
@@ -102,26 +103,41 @@ def _clean_df(df, target_col):
 
 def _preprocess(df, target_col):
     encoders = {}
-    label_mappings = {}   # {col: [original_val0, val1, ...]} index = encoded number
+    label_mappings = {}
+    imputation_log = []   # track what was imputed
 
     # Step 1 — Impute BEFORE encoding
     for col in df.columns:
         if df[col].isna().any():
+            n_missing = int(df[col].isna().sum())
             if _is_numeric(df[col]):
-                df[col] = df[col].fillna(df[col].median())
+                fill_val = df[col].median()
+                df[col] = df[col].fillna(fill_val)
+                imputation_log.append({
+                    'column': col,
+                    'missing': n_missing,
+                    'strategy': 'Median imputation',
+                    'fill_value': round(float(fill_val), 4),
+                })
             else:
                 mode = df[col].mode()
                 fill = mode.iloc[0] if len(mode) > 0 else 'Unknown'
                 df[col] = df[col].fillna(fill)
+                imputation_log.append({
+                    'column': col,
+                    'missing': n_missing,
+                    'strategy': 'Mode imputation',
+                    'fill_value': str(fill),
+                })
 
-    # Step 2 — Encode all non-numeric columns; record original classes
+    # Step 2 — Encode all non-numeric columns
     for col in df.columns:
         if not _is_numeric(df[col]):
             le = LabelEncoder()
             original_classes = sorted(df[col].astype(str).unique().tolist())
             df[col] = le.fit_transform(df[col].astype(str))
             encoders[col] = le
-            label_mappings[col] = list(le.classes_)  # in encoded order
+            label_mappings[col] = list(le.classes_)
 
     # Step 3 — Final safety coerce
     for col in df.columns:
@@ -138,7 +154,7 @@ def _preprocess(df, target_col):
         X_scaled, y, test_size=0.2, random_state=42, shuffle=True
     )
 
-    return X_train, X_test, y_train, y_test, scaler, encoders, label_mappings, feature_names
+    return X_train, X_test, y_train, y_test, scaler, encoders, label_mappings, feature_names, imputation_log
 
 
 # ── Chart generators ───────────────────────────────────────────────────────────
@@ -245,10 +261,21 @@ def train(request):
     try:
         original_rows = len(df)
         original_cols = len(df.columns)
+        duplicates_count = int(df.duplicated().sum())
+
+        # Collect null info BEFORE cleaning
+        null_info = {}
+        for col in df.columns:
+            n = int(df[col].isna().sum())
+            if n > 0:
+                pct = round(n / len(df) * 100, 2)
+                null_info[col] = {'count': n, 'pct': pct,
+                                  'dtype': str(df[col].dtype)}
+
         df, rows_before, rows_after, dropped_cols = _clean_df(df, target)
         problem_type = _detect_problem_type(df[target])
 
-        X_train, X_test, y_train, y_test, scaler, encoders, label_mappings, feature_names = \
+        X_train, X_test, y_train, y_test, scaler, encoders, label_mappings, feature_names, imputation_log = \
             _preprocess(df.copy(), target)
     except Exception as e:
         messages.error(request, f'Preprocessing error: {e}')
@@ -279,7 +306,6 @@ def train(request):
         results.sort(key=lambda x: x['score'], reverse=True)
         best = results[0]
 
-        # Confusion matrix for best model
         if best.get('preds') is not None:
             try:
                 labels = sorted(y_test.unique())
@@ -288,7 +314,6 @@ def train(request):
             except Exception:
                 pass
 
-        # Classification metrics
         extra_metrics = {}
         if best.get('preds') is not None:
             try:
@@ -323,7 +348,6 @@ def train(request):
         results.sort(key=lambda x: x['score'], reverse=True)
         best = results[0]
 
-        # Actual vs Predicted chart
         if best.get('preds') is not None:
             try:
                 charts_data['actual_vs_pred'] = _chart_actual_vs_pred(
@@ -331,7 +355,6 @@ def train(request):
             except Exception:
                 pass
 
-        # Regression metrics
         extra_metrics = {}
         if best.get('preds') is not None:
             try:
@@ -359,7 +382,6 @@ def train(request):
                 ]
                 fi_chart = _chart_feature_importance(
                     [p[0] for p in pairs], [p[1] for p in pairs])
-
             elif hasattr(best_model, 'coef_'):
                 coef = np.array(best_model.coef_).flatten()
                 pairs = sorted(zip(feature_names, np.abs(coef)),
@@ -375,7 +397,6 @@ def train(request):
     if fi_chart:
         charts_data['feature_importance'] = fi_chart
 
-    # Model comparison chart
     try:
         names  = [r['name'] for r in results]
         scores = [r['score'] for r in results]
@@ -436,15 +457,18 @@ def train(request):
         'best_score':      best['score'],
         'extra_metrics':   extra_metrics,
         'preprocessing': {
-            'original_rows':  original_rows,
-            'original_cols':  original_cols,
+            'original_rows':    original_rows,
+            'original_cols':    original_cols,
+            'duplicates_count': duplicates_count,
             'rows_after_clean': rows_after,
-            'rows_dropped':   rows_before - rows_after,
-            'cols_dropped':   dropped_cols,
-            'cols_after':     len(feature_names) + 1,
-            'encoded_cols':   list(label_mappings.keys()),
-            'n_train':        len(X_train),
-            'n_test':         len(y_test),
+            'rows_dropped':     rows_before - rows_after,
+            'cols_dropped':     dropped_cols,
+            'cols_after':       len(feature_names) + 1,
+            'encoded_cols':     list(label_mappings.keys()),
+            'n_train':          len(X_train),
+            'n_test':           len(y_test),
+            'null_info':        null_info,
+            'imputation_log':   imputation_log,
         },
     }
     with open(meta_path, 'w') as fp:
@@ -489,7 +513,7 @@ def results(request):
 
 
 def report_pdf(request):
-    """Generate and download a PDF report of the ML results."""
+    """Generate a university-level PDF report of the ML pipeline."""
     meta_path = os.path.join(settings.SAVED_MODELS_DIR, 'metadata.json')
     if not os.path.exists(meta_path):
         messages.error(request, 'No trained model found. Train a model first.')
@@ -504,193 +528,540 @@ def report_pdf(request):
     from reportlab.lib import colors
     from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer,
                                      Table, TableStyle, Image as RLImage,
-                                     HRFlowable, PageBreak)
-    from reportlab.lib.enums import TA_LEFT, TA_CENTER
+                                     HRFlowable, PageBreak, KeepTogether)
+    from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+    import re
 
+    W, H = A4
     buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=2*cm, rightMargin=2*cm,
-                             topMargin=2*cm, bottomMargin=2*cm)
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        leftMargin=2.2*cm, rightMargin=2.2*cm,
+        topMargin=2.2*cm, bottomMargin=2.2*cm,
+        title='AutoAnalyst AI — ML Report',
+        author='AutoAnalyst AI',
+    )
 
-    styles = getSampleStyleSheet()
-    style_h1 = ParagraphStyle('h1', fontSize=20, leading=24, textColor=colors.HexColor('#09090b'),
-                                spaceAfter=6, fontName='Helvetica-Bold')
-    style_h2 = ParagraphStyle('h2', fontSize=13, leading=16, textColor=colors.HexColor('#09090b'),
-                                spaceAfter=4, spaceBefore=14, fontName='Helvetica-Bold')
-    style_h3 = ParagraphStyle('h3', fontSize=11, leading=13, textColor=colors.HexColor('#3f3f46'),
-                                spaceAfter=3, spaceBefore=8, fontName='Helvetica-Bold')
-    style_body = ParagraphStyle('body', fontSize=9, leading=13, textColor=colors.HexColor('#3f3f46'),
-                                 spaceAfter=3, fontName='Helvetica')
-    style_muted = ParagraphStyle('muted', fontSize=8, leading=11, textColor=colors.HexColor('#71717a'),
-                                  fontName='Helvetica')
-    style_center = ParagraphStyle('center', fontSize=9, leading=12, alignment=TA_CENTER,
-                                   textColor=colors.HexColor('#3f3f46'), fontName='Helvetica')
+    # ── Paragraph styles ──────────────────────────────────────────────────────
+    BLACK   = colors.HexColor('#09090b')
+    DARK    = colors.HexColor('#3f3f46')
+    MUTED   = colors.HexColor('#71717a')
+    MUTED2  = colors.HexColor('#a1a1aa')
+    GREEN   = colors.HexColor('#16a34a')
+    BORDER  = colors.HexColor('#e4e4e7')
+    BG      = colors.HexColor('#fafafa')
+    WHITE   = colors.white
+
+    sH1  = ParagraphStyle('H1',  fontSize=22, leading=26, textColor=BLACK, fontName='Helvetica-Bold', spaceAfter=4)
+    sH2  = ParagraphStyle('H2',  fontSize=14, leading=18, textColor=BLACK, fontName='Helvetica-Bold', spaceBefore=18, spaceAfter=6)
+    sH3  = ParagraphStyle('H3',  fontSize=11, leading=14, textColor=DARK,  fontName='Helvetica-Bold', spaceBefore=10, spaceAfter=4)
+    sH4  = ParagraphStyle('H4',  fontSize=10, leading=13, textColor=DARK,  fontName='Helvetica-Bold', spaceBefore=6,  spaceAfter=3)
+    sBod = ParagraphStyle('Bod', fontSize=9,  leading=14, textColor=DARK,  fontName='Helvetica', spaceAfter=4)
+    sMut = ParagraphStyle('Mut', fontSize=8,  leading=11, textColor=MUTED, fontName='Helvetica')
+    sCen = ParagraphStyle('Cen', fontSize=9,  leading=12, textColor=DARK,  fontName='Helvetica', alignment=TA_CENTER)
+    sRig = ParagraphStyle('Rig', fontSize=9,  leading=12, textColor=DARK,  fontName='Helvetica', alignment=TA_RIGHT)
+    sBold= ParagraphStyle('Bold',fontSize=9,  leading=13, textColor=BLACK, fontName='Helvetica-Bold', spaceAfter=3)
+
+    def table_style(header_color=BLACK, alt=True):
+        ts = [
+            ('BACKGROUND',   (0,0), (-1,0),  header_color),
+            ('TEXTCOLOR',    (0,0), (-1,0),  WHITE),
+            ('FONTNAME',     (0,0), (-1,0),  'Helvetica-Bold'),
+            ('FONTSIZE',     (0,0), (-1,-1), 8.5),
+            ('LEADING',      (0,0), (-1,-1), 12),
+            ('GRID',         (0,0), (-1,-1), 0.4, BORDER),
+            ('LEFTPADDING',  (0,0), (-1,-1), 7),
+            ('RIGHTPADDING', (0,0), (-1,-1), 7),
+            ('TOPPADDING',   (0,0), (-1,-1), 5),
+            ('BOTTOMPADDING',(0,0), (-1,-1), 5),
+            ('VALIGN',       (0,0), (-1,-1), 'MIDDLE'),
+        ]
+        if alt:
+            ts += [('ROWBACKGROUNDS', (0,1), (-1,-1), [BG, WHITE])]
+        return TableStyle(ts)
+
+    def hr():
+        return HRFlowable(width='100%', thickness=0.5, color=BORDER, spaceAfter=6, spaceBefore=4)
+
+    def section_spacer():
+        return Spacer(1, 10)
+
+    def add_chart(story, b64_str, caption='', width_cm=13):
+        img_bytes = io.BytesIO(base64.b64decode(b64_str))
+        img = RLImage(img_bytes, width=width_cm*cm, height=width_cm*0.62*cm)
+        story.append(img)
+        if caption:
+            story.append(Paragraph(caption, sMut))
+        story.append(Spacer(1, 6))
+
+    def clean_html(text):
+        return re.sub(r'<[^>]+>', '', str(text))
 
     story = []
+    pre  = meta.get('preprocessing', {})
+    now  = datetime.datetime.now().strftime('%B %d, %Y')
+    dataset_name = request.session.get('dataset_name', 'N/A')
 
-    # ── Title ──────────────────────────────────────────────────────────────────
-    story.append(Paragraph('AutoAnalyst AI — ML Report', style_h1))
-    story.append(Paragraph(
-        f"Dataset: {request.session.get('dataset_name', 'N/A')}  ·  Target: {meta['target']}  ·  Problem: {meta['problem_type']}",
-        style_muted))
-    story.append(HRFlowable(width='100%', thickness=1, color=colors.HexColor('#e4e4e7'), spaceAfter=10))
+    # ════════════════════════════════════════════════════════════
+    # TITLE PAGE
+    # ════════════════════════════════════════════════════════════
+    story.append(Spacer(1, 1.5*cm))
+    story.append(Paragraph('AutoAnalyst AI', ParagraphStyle(
+        'Cover', fontSize=28, leading=32, textColor=BLACK, fontName='Helvetica-Bold',
+        alignment=TA_CENTER)))
+    story.append(Spacer(1, 6))
+    story.append(Paragraph('Machine Learning Pipeline Report', ParagraphStyle(
+        'CoverSub', fontSize=14, leading=18, textColor=MUTED, fontName='Helvetica',
+        alignment=TA_CENTER)))
+    story.append(Spacer(1, 0.8*cm))
+    story.append(HRFlowable(width='60%', thickness=1.5, color=BLACK, hAlign='CENTER'))
+    story.append(Spacer(1, 0.8*cm))
 
-    # ── Preprocessing ──────────────────────────────────────────────────────────
-    pre = meta.get('preprocessing', {})
-    story.append(Paragraph('1. Data Preprocessing', style_h2))
-    pre_data = [
-        ['Metric', 'Value'],
-        ['Original rows',      str(pre.get('original_rows', 'N/A'))],
-        ['Rows after cleaning', str(pre.get('rows_after_clean', 'N/A'))],
-        ['Rows dropped',       str(pre.get('rows_dropped', 'N/A'))],
-        ['Original columns',   str(pre.get('original_cols', 'N/A'))],
-        ['Columns used',       str(pre.get('cols_after', 'N/A'))],
-        ['Encoded columns',    ', '.join(pre.get('encoded_cols', [])) or 'None'],
-        ['Training samples',   str(pre.get('n_train', 'N/A'))],
-        ['Test samples',       str(pre.get('n_test', 'N/A'))],
+    # Meta table
+    meta_cover = [
+        ['Dataset',       dataset_name],
+        ['Target Column', meta.get('target', 'N/A')],
+        ['Problem Type',  meta.get('problem_type', 'N/A').title()],
+        ['Best Model',    meta.get('best_model_name', 'N/A')],
+        [meta.get('metric_label', 'Score'), f"{meta.get('best_score', 'N/A')}%"],
+        ['Report Date',   now],
     ]
-    t = Table(pre_data, colWidths=[7*cm, 9*cm])
-    t.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#09090b')),
-        ('TEXTCOLOR',  (0,0), (-1,0), colors.white),
-        ('FONTNAME',   (0,0), (-1,0), 'Helvetica-Bold'),
-        ('FONTSIZE',   (0,0), (-1,-1), 9),
-        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor('#fafafa'), colors.white]),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e4e4e7')),
-        ('LEFTPADDING', (0,0), (-1,-1), 8),
-        ('RIGHTPADDING',(0,0), (-1,-1), 8),
-        ('TOPPADDING',  (0,0), (-1,-1), 5),
-        ('BOTTOMPADDING',(0,0), (-1,-1), 5),
+    tm = Table(meta_cover, colWidths=[5*cm, 10*cm], hAlign='CENTER')
+    tm.setStyle(TableStyle([
+        ('FONTNAME',     (0,0), (0,-1), 'Helvetica-Bold'),
+        ('FONTNAME',     (1,0), (1,-1), 'Helvetica'),
+        ('FONTSIZE',     (0,0), (-1,-1), 10),
+        ('LEADING',      (0,0), (-1,-1), 15),
+        ('TEXTCOLOR',    (0,0), (0,-1), MUTED),
+        ('TEXTCOLOR',    (1,0), (1,-1), BLACK),
+        ('BOTTOMPADDING',(0,0), (-1,-1), 7),
+        ('TOPPADDING',   (0,0), (-1,-1), 7),
+        ('LINEBELOW',    (0,0), (-1,-2), 0.3, BORDER),
+        ('LEFTPADDING',  (0,0), (-1,-1), 0),
     ]))
-    story.append(t)
+    story.append(tm)
+    story.append(Spacer(1, 1*cm))
+    story.append(Paragraph(
+        'Generated by AutoAnalyst AI — Automated Machine Learning Platform',
+        ParagraphStyle('FootCover', fontSize=8, textColor=MUTED2,
+                       fontName='Helvetica', alignment=TA_CENTER)
+    ))
+    story.append(PageBreak())
 
-    # ── Label Encoding ────────────────────────────────────────────────────────
+    # ════════════════════════════════════════════════════════════
+    # SECTION 1 — DATASET OVERVIEW
+    # ════════════════════════════════════════════════════════════
+    story.append(Paragraph('1. Dataset Overview', sH2))
+    story.append(hr())
+    story.append(Paragraph(
+        f'The dataset <strong>{dataset_name}</strong> was uploaded and processed through the '
+        f'AutoAnalyst pipeline. The table below summarizes its key structural properties.',
+        sBod))
+    story.append(section_spacer())
+
+    ov_data = [
+        ['Property', 'Value', 'Notes'],
+        ['Original Rows',     str(pre.get('original_rows', 'N/A')),
+         'Total records in the uploaded file'],
+        ['Original Columns',  str(pre.get('original_cols', 'N/A')),
+         'Total features including target'],
+        ['Duplicate Rows',    str(pre.get('duplicates_count', 'N/A')),
+         'Identical rows detected in the dataset'],
+        ['Rows After Cleaning', str(pre.get('rows_after_clean', 'N/A')),
+         'Rows remaining after null-target removal'],
+        ['Rows Dropped',      str(pre.get('rows_dropped', 'N/A')),
+         'Rows removed due to missing target value'],
+        ['Columns Used',      str(pre.get('cols_after', 'N/A')),
+         'Columns used after dropping uninformative ones'],
+        ['Training Samples',  str(pre.get('n_train', 'N/A')),
+         '80% of cleaned data (random split, seed=42)'],
+        ['Test Samples',      str(pre.get('n_test',  'N/A')),
+         '20% of cleaned data (held-out evaluation set)'],
+    ]
+    t_ov = Table(ov_data, colWidths=[4.5*cm, 3.5*cm, 8*cm])
+    t_ov.setStyle(table_style())
+    story.append(t_ov)
+
+    # Dropped columns
+    dropped = pre.get('cols_dropped', [])
+    if dropped:
+        story.append(section_spacer())
+        story.append(Paragraph('Columns Removed During Cleaning', sH3))
+        story.append(Paragraph(
+            'The following columns were automatically removed because they exceeded '
+            '80% missing values, had zero variance, or were identified as non-informative '
+            'identifiers (e.g. ID, email, name):', sBod))
+        dc_data = [['#', 'Column Name', 'Removal Reason']]
+        for i, col in enumerate(dropped, 1):
+            dc_data.append([str(i), col, 'High missing rate / constant / identifier column'])
+        t_dc = Table(dc_data, colWidths=[1*cm, 7*cm, 8*cm])
+        t_dc.setStyle(table_style())
+        story.append(t_dc)
+
+    story.append(PageBreak())
+
+    # ════════════════════════════════════════════════════════════
+    # SECTION 2 — DATA QUALITY & MISSING VALUE ANALYSIS
+    # ════════════════════════════════════════════════════════════
+    story.append(Paragraph('2. Data Quality & Missing Value Analysis', sH2))
+    story.append(hr())
+    null_info = pre.get('null_info', {})
+
+    if null_info:
+        story.append(Paragraph(
+            f'The dataset contained missing values in <strong>{len(null_info)}</strong> column(s). '
+            f'Missing numeric values were filled using the column <strong>median</strong> '
+            f'(robust to outliers), while missing categorical values were filled using the '
+            f'column <strong>mode</strong> (most frequent value). '
+            f'This strategy ensures no information is lost and the model trains on a complete dataset.',
+            sBod))
+        story.append(section_spacer())
+
+        mv_data = [['Column', 'Data Type', 'Missing Count', 'Missing %', 'Imputation Strategy']]
+        for col, info in null_info.items():
+            dtype_str = info.get('dtype', 'N/A')
+            if 'int' in dtype_str or 'float' in dtype_str:
+                strategy = 'Median imputation'
+            else:
+                strategy = 'Mode imputation'
+            mv_data.append([
+                col,
+                dtype_str,
+                str(info.get('count', 0)),
+                f"{info.get('pct', 0)}%",
+                strategy,
+            ])
+        t_mv = Table(mv_data, colWidths=[4*cm, 3*cm, 2.5*cm, 2.5*cm, 4*cm])
+        t_mv.setStyle(table_style())
+
+        # Highlight high missing % rows in yellow
+        ts_extra = list(t_mv._tblStyle._cmds)
+        for row_i, (col, info) in enumerate(null_info.items(), 1):
+            if info.get('pct', 0) > 30:
+                ts_extra.append(('BACKGROUND', (0, row_i), (-1, row_i),
+                                  colors.HexColor('#fefce8')))
+        story.append(t_mv)
+
+        # Imputation detail
+        imputation_log = pre.get('imputation_log', [])
+        if imputation_log:
+            story.append(section_spacer())
+            story.append(Paragraph('Imputation Detail', sH3))
+            il_data = [['Column', 'Missing Count', 'Strategy', 'Fill Value']]
+            for item in imputation_log:
+                il_data.append([
+                    item.get('column', ''),
+                    str(item.get('missing', '')),
+                    item.get('strategy', ''),
+                    str(item.get('fill_value', '')),
+                ])
+            t_il = Table(il_data, colWidths=[4.5*cm, 3*cm, 4*cm, 4.5*cm])
+            t_il.setStyle(table_style())
+            story.append(t_il)
+    else:
+        story.append(Paragraph(
+            '✓ No missing values were detected in this dataset. All columns contained complete data.',
+            ParagraphStyle('Ok', fontSize=10, leading=14, textColor=GREEN, fontName='Helvetica-Bold')))
+
+    # Duplicates
+    story.append(section_spacer())
+    story.append(Paragraph('Duplicate Row Handling', sH3))
+    dup_count = pre.get('duplicates_count', 0)
+    if dup_count > 0:
+        story.append(Paragraph(
+            f'The dataset contained <strong>{dup_count}</strong> duplicate row(s). '
+            f'Note: AutoAnalyst focuses on rows with null target values for removal; '
+            f'exact duplicates are retained to preserve data volume unless they represent '
+            f'copy errors. You may drop them manually using <em>df.drop_duplicates()</em> if needed.',
+            sBod))
+    else:
+        story.append(Paragraph(
+            '✓ No duplicate rows were found in the dataset.',
+            ParagraphStyle('Ok', fontSize=10, leading=14, textColor=GREEN, fontName='Helvetica-Bold')))
+
+    story.append(PageBreak())
+
+    # ════════════════════════════════════════════════════════════
+    # SECTION 3 — FEATURE ENGINEERING & ENCODING
+    # ════════════════════════════════════════════════════════════
+    story.append(Paragraph('3. Feature Engineering & Encoding', sH2))
+    story.append(hr())
     lm = meta.get('label_mappings', {})
+    feature_names = meta.get('feature_names', [])
+
+    story.append(Paragraph(
+        f'The pipeline used <strong>{len(feature_names)}</strong> feature(s) to predict '
+        f'<strong>{meta.get("target", "target")}</strong>. '
+        f'All numeric features were standardized using <strong>StandardScaler</strong> '
+        f'(zero mean, unit variance). '
+        f'Categorical (text) features were converted to numbers using '
+        f'<strong>Label Encoding</strong> before standardization.',
+        sBod))
+    story.append(section_spacer())
+
+    story.append(Paragraph('Feature List', sH3))
+    feat_data = [['#', 'Feature Name', 'Type', 'Encoding Applied']]
+    for i, feat in enumerate(feature_names, 1):
+        if feat in lm:
+            feat_type = 'Categorical'
+            enc = 'Label Encoding + StandardScaler'
+        else:
+            feat_type = 'Numeric'
+            enc = 'StandardScaler only'
+        feat_data.append([str(i), feat, feat_type, enc])
+    t_feat = Table(feat_data, colWidths=[1*cm, 6*cm, 3*cm, 6*cm])
+    t_feat.setStyle(table_style())
+    story.append(t_feat)
+
     if lm:
-        story.append(Paragraph('2. Label Encoding', style_h2))
-        story.append(Paragraph('Original string values → numeric labels used in training:', style_body))
-        enc_data = [['Column', 'Original Values → Encoded']]
+        story.append(section_spacer())
+        story.append(Paragraph('Label Encoding Mappings', sH3))
+        story.append(Paragraph(
+            'Each unique string value in a categorical column was assigned a unique integer. '
+            'During prediction, the same mapping is applied to user input. '
+            'The table below shows the original string values and their encoded integers.',
+            sBod))
+        enc_data = [['Column', 'Original Values → Encoded Integers']]
         for col, vals in lm.items():
-            mapping_str = ', '.join([f'{v}→{i}' for i, v in enumerate(vals)])
+            mapping_str = '  |  '.join([f'{v} → {i}' for i, v in enumerate(vals[:12])])
+            if len(vals) > 12:
+                mapping_str += f'  | ... ({len(vals)-12} more)'
             enc_data.append([col, mapping_str])
-        te = Table(enc_data, colWidths=[6*cm, 10*cm])
-        te.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#09090b')),
-            ('TEXTCOLOR',  (0,0), (-1,0), colors.white),
-            ('FONTNAME',   (0,0), (-1,0), 'Helvetica-Bold'),
-            ('FONTSIZE',   (0,0), (-1,-1), 8),
-            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor('#fafafa'), colors.white]),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e4e4e7')),
-            ('LEFTPADDING', (0,0), (-1,-1), 8),
-            ('RIGHTPADDING',(0,0), (-1,-1), 8),
-            ('TOPPADDING',  (0,0), (-1,-1), 5),
-            ('BOTTOMPADDING',(0,0), (-1,-1), 5),
-        ]))
+        te = Table(enc_data, colWidths=[4*cm, 12*cm])
+        te.setStyle(table_style())
         story.append(te)
 
-    # ── Model Results ─────────────────────────────────────────────────────────
-    story.append(Paragraph('3. Model Performance', style_h2))
-    story.append(Paragraph(f"Metric: {meta['metric_label']}  ·  Best model: {meta['best_model_name']}  ·  Score: {meta['best_score']}%", style_body))
+    story.append(PageBreak())
+
+    # ════════════════════════════════════════════════════════════
+    # SECTION 4 — MODEL TRAINING & SELECTION
+    # ════════════════════════════════════════════════════════════
+    story.append(Paragraph('4. Model Training & Selection', sH2))
+    story.append(hr())
+    problem_type = meta.get('problem_type', 'classification')
+    story.append(Paragraph(
+        f'Problem type detected: <strong>{problem_type.title()}</strong>. '
+        f'The pipeline automatically trained multiple algorithms and selected the '
+        f'best-performing model based on <strong>{meta.get("metric_label", "Score")}</strong> '
+        f'on a held-out 20% test set. The train/test split used a fixed random seed (42) '
+        f'for reproducibility.',
+        sBod))
+    story.append(section_spacer())
+
+    if problem_type == 'classification':
+        story.append(Paragraph(
+            'Algorithms Evaluated: Logistic Regression, Random Forest, K-Nearest Neighbors, Support Vector Machine.',
+            sBod))
+    else:
+        story.append(Paragraph(
+            'Algorithms Evaluated: Linear Regression, Random Forest Regressor, Ridge Regression.',
+            sBod))
+
     ml_results = request.session.get('ml_results', [])
     if ml_results:
-        r_data = [['Rank', 'Model', f"{meta['metric_label']} (%)","Status"]]
+        story.append(section_spacer())
+        r_data = [['Rank', 'Model', f"{meta['metric_label']} (%)", 'Status']]
         for i, r in enumerate(sorted(ml_results, key=lambda x: x['score'], reverse=True), 1):
-            r_data.append([str(i), r['name'], str(r['score']),
-                           'Best ✓' if r['name'] == meta['best_model_name'] else ''])
+            is_best = r['name'] == meta['best_model_name']
+            r_data.append([
+                str(i), r['name'], f"{r['score']}%",
+                '★ Best Model' if is_best else '—'
+            ])
         tr = Table(r_data, colWidths=[1.5*cm, 8*cm, 4*cm, 3*cm])
-        tr.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#09090b')),
-            ('TEXTCOLOR',  (0,0), (-1,0), colors.white),
-            ('FONTNAME',   (0,0), (-1,0), 'Helvetica-Bold'),
-            ('FONTSIZE',   (0,0), (-1,-1), 9),
-            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor('#fafafa'), colors.white]),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e4e4e7')),
-            ('LEFTPADDING', (0,0), (-1,-1), 8),
-            ('RIGHTPADDING',(0,0), (-1,-1), 8),
-            ('TOPPADDING',  (0,0), (-1,-1), 5),
-            ('BOTTOMPADDING',(0,0), (-1,-1), 5),
-        ]))
+        ts = table_style(header_color=BLACK)
+        # Highlight best row
+        for row_i, r in enumerate(sorted(ml_results, key=lambda x: x['score'], reverse=True), 1):
+            if r['name'] == meta['best_model_name']:
+                ts._cmds.append(('BACKGROUND', (0, row_i), (-1, row_i),
+                                  colors.HexColor('#f0fdf4')))
+                ts._cmds.append(('TEXTCOLOR', (0, row_i), (-1, row_i), GREEN))
+                ts._cmds.append(('FONTNAME',  (0, row_i), (-1, row_i), 'Helvetica-Bold'))
+        tr.setStyle(ts)
         story.append(tr)
 
     # Extra metrics
     extra = meta.get('extra_metrics', {})
     if extra:
-        story.append(Spacer(1, 8))
-        em_data = [['Metric', 'Value']] + [[k, str(v)] for k, v in extra.items()]
-        tem = Table(em_data, colWidths=[7*cm, 9*cm])
-        tem.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#3f3f46')),
-            ('TEXTCOLOR',  (0,0), (-1,0), colors.white),
-            ('FONTNAME',   (0,0), (-1,0), 'Helvetica-Bold'),
-            ('FONTSIZE',   (0,0), (-1,-1), 9),
-            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor('#fafafa'), colors.white]),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e4e4e7')),
-            ('LEFTPADDING', (0,0), (-1,-1), 8),
-            ('RIGHTPADDING',(0,0), (-1,-1), 8),
-            ('TOPPADDING',  (0,0), (-1,-1), 4),
-            ('BOTTOMPADDING',(0,0), (-1,-1), 4),
-        ]))
+        story.append(section_spacer())
+        story.append(Paragraph('Additional Evaluation Metrics (Best Model)', sH3))
+        em_data = [['Metric', 'Value', 'Description']]
+        metric_desc = {
+            'Precision': 'Fraction of positive predictions that are actually correct',
+            'Recall':    'Fraction of actual positives correctly identified',
+            'F1 Score':  'Harmonic mean of Precision and Recall',
+            'MAE':       'Mean Absolute Error — average prediction error magnitude',
+            'RMSE':      'Root Mean Squared Error — penalizes large errors more',
+            'MSE':       'Mean Squared Error — average squared prediction error',
+        }
+        for k, v in extra.items():
+            unit = '%' if isinstance(v, float) and v > 1 else ''
+            em_data.append([k, f'{v}{unit}', metric_desc.get(k, '')])
+        tem = Table(em_data, colWidths=[3.5*cm, 3*cm, 9.5*cm])
+        tem.setStyle(table_style(header_color=colors.HexColor('#3f3f46')))
         story.append(tem)
 
-    # ── Charts ────────────────────────────────────────────────────────────────
+    story.append(PageBreak())
+
+    # ════════════════════════════════════════════════════════════
+    # SECTION 5 — VISUAL ANALYSIS
+    # ════════════════════════════════════════════════════════════
     charts_data = request.session.get('ml_charts', {})
     if charts_data:
-        story.append(Paragraph('4. Visual Analysis', style_h2))
-
-        def add_chart(b64_str, width_cm=14):
-            img_bytes = io.BytesIO(base64.b64decode(b64_str))
-            img = RLImage(img_bytes, width=width_cm*cm, height=width_cm*0.7*cm)
-            story.append(img)
-            story.append(Spacer(1, 6))
+        story.append(Paragraph('5. Visual Analysis', sH2))
+        story.append(hr())
 
         if 'model_comparison' in charts_data:
-            story.append(Paragraph('Model Comparison', style_h3))
-            add_chart(charts_data['model_comparison'])
-        if 'feature_importance' in charts_data:
-            story.append(Paragraph('Feature Importance', style_h3))
-            add_chart(charts_data['feature_importance'])
-        if 'confusion' in charts_data:
-            story.append(Paragraph('Confusion Matrix', style_h3))
-            add_chart(charts_data['confusion'], width_cm=9)
-        if 'actual_vs_pred' in charts_data:
-            story.append(Paragraph('Actual vs Predicted', style_h3))
-            add_chart(charts_data['actual_vs_pred'])
+            story.append(Paragraph('5.1 Model Comparison', sH3))
+            story.append(Paragraph(
+                f'The bar chart below compares the {meta.get("metric_label","Score")} of all '
+                f'trained models. The best-performing model is highlighted in green.', sBod))
+            add_chart(story, charts_data['model_comparison'],
+                      f'Figure 1: Model comparison by {meta.get("metric_label","Score")}')
 
-    # ── Feature Importance table ───────────────────────────────────────────────
+        if 'feature_importance' in charts_data:
+            story.append(section_spacer())
+            story.append(Paragraph('5.2 Feature Importance', sH3))
+            story.append(Paragraph(
+                'Feature importance shows which input variables had the greatest influence '
+                'on the model\'s predictions. Higher bars indicate stronger predictive power.', sBod))
+            add_chart(story, charts_data['feature_importance'],
+                      'Figure 2: Feature importance scores from the best model')
+
+        if 'confusion' in charts_data:
+            story.append(section_spacer())
+            story.append(Paragraph('5.3 Confusion Matrix', sH3))
+            story.append(Paragraph(
+                'The confusion matrix shows how many samples were correctly and incorrectly '
+                'classified per class. Diagonal cells represent correct predictions; '
+                'off-diagonal cells represent misclassifications.', sBod))
+            add_chart(story, charts_data['confusion'],
+                      'Figure 3: Confusion matrix on the 20% test set', width_cm=9)
+
+        if 'actual_vs_pred' in charts_data:
+            story.append(section_spacer())
+            story.append(Paragraph('5.3 Actual vs Predicted', sH3))
+            story.append(Paragraph(
+                'Each point represents one test sample. Points closer to the red dashed '
+                'diagonal line indicate more accurate predictions. Scatter indicates model error.', sBod))
+            add_chart(story, charts_data['actual_vs_pred'],
+                      'Figure 3: Actual vs Predicted values on the 20% test set')
+
+    story.append(PageBreak())
+
+    # ════════════════════════════════════════════════════════════
+    # SECTION 6 — FEATURE IMPORTANCE TABLE
+    # ════════════════════════════════════════════════════════════
     fi = request.session.get('feature_importance', [])
     if fi:
-        story.append(Paragraph('5. Feature Importance Rankings', style_h2))
-        fi_data = [['Rank', 'Feature', 'Importance']]
+        story.append(Paragraph('6. Feature Importance Rankings', sH2))
+        story.append(hr())
+        story.append(Paragraph(
+            'The table below ranks each feature by its contribution to the model\'s '
+            'decision-making process. For tree-based models this is based on Gini impurity '
+            'reduction; for linear models it is based on the absolute coefficient value.',
+            sBod))
+        story.append(section_spacer())
+        fi_data = [['Rank', 'Feature Name', 'Importance Score', 'Relative Strength']]
+        max_imp = fi[0]['importance'] if fi else 1
         for i, item in enumerate(fi, 1):
-            fi_data.append([str(i), item['feature'], str(item['importance'])])
-        tfi = Table(fi_data, colWidths=[1.5*cm, 11*cm, 4*cm])
-        tfi.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#09090b')),
-            ('TEXTCOLOR',  (0,0), (-1,0), colors.white),
-            ('FONTNAME',   (0,0), (-1,0), 'Helvetica-Bold'),
-            ('FONTSIZE',   (0,0), (-1,-1), 9),
-            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor('#fafafa'), colors.white]),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e4e4e7')),
-            ('LEFTPADDING', (0,0), (-1,-1), 8),
-            ('RIGHTPADDING',(0,0), (-1,-1), 8),
-            ('TOPPADDING',  (0,0), (-1,-1), 5),
-            ('BOTTOMPADDING',(0,0), (-1,-1), 5),
-        ]))
+            pct = round(item['importance'] / max_imp * 100, 1)
+            bars = '█' * int(pct / 10)
+            fi_data.append([str(i), item['feature'], f"{item['importance']:.4f}", f"{bars} {pct}%"])
+        tfi = Table(fi_data, colWidths=[1.5*cm, 7*cm, 4*cm, 4.5*cm])
+        tfi.setStyle(table_style())
         story.append(tfi)
+        story.append(PageBreak())
 
-    # ── Insights ──────────────────────────────────────────────────────────────
+    # ════════════════════════════════════════════════════════════
+    # SECTION 7 — AUTO-GENERATED INSIGHTS
+    # ════════════════════════════════════════════════════════════
     insights = request.session.get('ml_insights', [])
+    sec_num = 7 if fi else 6
+    story.append(Paragraph(f'{sec_num}. Auto-Generated Insights & Recommendations', sH2))
+    story.append(hr())
+    story.append(Paragraph(
+        'The following observations were automatically generated by analyzing '
+        'the dataset structure, preprocessing results, and model performance.',
+        sBod))
+    story.append(section_spacer())
     if insights:
-        story.append(Paragraph('6. Auto-Generated Insights', style_h2))
         for ins in insights:
-            # Strip HTML tags for PDF
-            import re
-            clean = re.sub(r'<[^>]+>', '', ins)
-            story.append(Paragraph(f'• {clean}', style_body))
-            story.append(Spacer(1, 2))
+            clean = clean_html(ins)
+            story.append(Paragraph(f'• {clean}', sBod))
+            story.append(Spacer(1, 3))
+    else:
+        story.append(Paragraph('No insights generated.', sMut))
+
+    story.append(section_spacer())
+    story.append(Paragraph('Recommendations', sH3))
+    recs = [
+        'Collect more data if model accuracy is below expectations — especially for rare classes.',
+        'Apply feature selection techniques (e.g., Recursive Feature Elimination) to reduce noise.',
+        'Consider hyperparameter tuning (GridSearchCV) to further improve the best model.',
+        'Use cross-validation (k=5 or k=10) for a more robust performance estimate.',
+        'If the dataset has class imbalance, consider SMOTE or class_weight adjustments.',
+    ]
+    for rec in recs:
+        story.append(Paragraph(f'→ {rec}', sBod))
+        story.append(Spacer(1, 2))
+
+    # ════════════════════════════════════════════════════════════
+    # SECTION 8 — PIPELINE SUMMARY
+    # ════════════════════════════════════════════════════════════
+    story.append(PageBreak())
+    story.append(Paragraph(f'{sec_num+1}. Pipeline Execution Summary', sH2))
+    story.append(hr())
+    pipeline_steps = [
+        ['Step', 'Action', 'Outcome'],
+        ['1. Data Ingestion',
+         f'Loaded {dataset_name}',
+         f'{pre.get("original_rows","N/A")} rows × {pre.get("original_cols","N/A")} columns'],
+        ['2. Null Target Removal',
+         'Removed rows where target is null',
+         f'{pre.get("rows_dropped","0")} rows removed'],
+        ['3. Column Pruning',
+         'Dropped high-missing / constant / ID columns',
+         f'{len(dropped)} column(s) removed' if dropped else 'No columns removed'],
+        ['4. Missing Value Imputation',
+         'Numeric → Median, Categorical → Mode',
+         f'{len(pre.get("null_info",{}))} column(s) imputed'],
+        ['5. Label Encoding',
+         'LabelEncoder on categorical features',
+         f'{len(meta.get("label_mappings",{}))} column(s) encoded'],
+        ['6. Feature Scaling',
+         'StandardScaler (mean=0, std=1)',
+         f'{len(feature_names)} feature(s) scaled'],
+        ['7. Train/Test Split',
+         '80% train / 20% test, random_state=42',
+         f'{pre.get("n_train","N/A")} train / {pre.get("n_test","N/A")} test'],
+        ['8. Model Training',
+         f'Trained {len(ml_results) if ml_results else "N/A"} model(s)',
+         f'Best: {meta.get("best_model_name","N/A")}'],
+        ['9. Evaluation',
+         f'{meta.get("metric_label","Score")} on test set',
+         f'{meta.get("best_score","N/A")}%'],
+        ['10. Model Persistence',
+         'Saved best model as best_model.joblib',
+         'Ready for prediction'],
+    ]
+    t_pipe = Table(pipeline_steps, colWidths=[4*cm, 6*cm, 6*cm])
+    t_pipe.setStyle(table_style())
+    story.append(t_pipe)
+
+    story.append(Spacer(1, 1*cm))
+    story.append(HRFlowable(width='100%', thickness=0.5, color=BORDER))
+    story.append(Spacer(1, 6))
+    story.append(Paragraph(
+        f'AutoAnalyst AI  ·  Report generated on {now}  ·  All rights reserved.',
+        ParagraphStyle('Footer', fontSize=7.5, textColor=MUTED2,
+                       fontName='Helvetica', alignment=TA_CENTER)
+    ))
 
     doc.build(story)
     buf.seek(0)
     response = HttpResponse(buf.read(), content_type='application/pdf')
-    dataset_name = request.session.get('dataset_name', 'report').rsplit('.', 1)[0]
-    response['Content-Disposition'] = f'attachment; filename="autoanalyst_{dataset_name}_report.pdf"'
+    base_name = dataset_name.rsplit('.', 1)[0]
+    response['Content-Disposition'] = (
+        f'attachment; filename="AutoAnalyst_{base_name}_Report_{datetime.date.today()}.pdf"'
+    )
     return response
