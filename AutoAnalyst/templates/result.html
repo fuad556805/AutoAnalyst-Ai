@@ -6,22 +6,15 @@
   <aside class="sidebar">
     <a href="{% url 'home' %}" class="sidebar-brand">
       <div class="sb-logo-icon">
-        <svg viewBox="0 0 16 16" fill="none">
-          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
-          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
-          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
-          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
-        </svg>
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/></svg>
       </div>
-      <div class="sb-text">
-        <div class="sb-name">AutoAnalyst</div>
-        <div class="sb-sub">AI Platform</div>
-      </div>
+      <div class="sb-text"><div class="sb-name">AutoAnalyst</div><div class="sb-sub">AI Platform</div></div>
     </a>
     <ul class="sidebar-nav">
       <li><a href="{% url 'home' %}"><span class="nav-icon">⊞</span> Dashboard</a></li>
       <li><a href="{% url 'upload' %}"><span class="nav-icon">↑</span> Upload Data</a></li>
       <li><a href="{% url 'preview' %}"><span class="nav-icon">◫</span> Preview</a></li>
+      <li><a href="{% url 'visualize' %}"><span class="nav-icon">◈</span> Visualize</a></li>
       <li><a href="{% url 'select_target' %}"><span class="nav-icon">◎</span> Select Target</a></li>
       <li><a href="{% url 'results' %}" class="active"><span class="nav-icon">▤</span> Results</a></li>
       <li><a href="{% url 'predict' %}"><span class="nav-icon">⚡</span> Predict</a></li>
@@ -41,80 +34,243 @@
     <div class="progress-track mb-32">
       <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Upload</div></div>
       <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Preview</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Visualize</div></div>
       <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Target</div></div>
       <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Train</div></div>
-      <div class="progress-step active"><div class="progress-step-dot">5</div><div class="progress-step-label">Results</div></div>
-      <div class="progress-step"><div class="progress-step-dot">6</div><div class="progress-step-label">Predict</div></div>
+      <div class="progress-step active"><div class="progress-step-dot">6</div><div class="progress-step-label">Results</div></div>
+      <div class="progress-step"><div class="progress-step-dot">7</div><div class="progress-step-label">Predict</div></div>
     </div>
 
     <!-- Best model banner -->
-    <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px;background:var(--black);border-radius:var(--radius-lg);padding:24px 28px;margin-bottom:24px;position:relative;overflow:hidden;">
-      <div style="position:absolute;inset:0;background:radial-gradient(circle at 0% 50%,rgba(255,255,255,0.05) 0%,transparent 60%);"></div>
+    <div class="best-banner mb-20">
       <div style="position:relative;">
-        <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,0.45);margin-bottom:8px;">🏆 Best Performing Model</div>
-        <div style="font-size:20px;font-weight:700;color:white;letter-spacing:-0.4px;margin-bottom:4px;">{{ best_model }}</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.5);">{{ metric_label }} &nbsp;·&nbsp; {{ problem_type }}</div>
+        <div class="best-eyebrow">🏆 Best Performing Model</div>
+        <div class="best-name">{{ best_model }}</div>
+        <div class="best-meta">{{ metric_label }} &nbsp;·&nbsp; {{ problem_type }}</div>
       </div>
       {% for r in results %}{% if r.name == best_model %}
-      <div style="position:relative;text-align:right;">
-        <div style="font-size:42px;font-weight:800;color:#4ade80;letter-spacing:-2px;line-height:1;">{{ r.score }}%</div>
+      <div style="text-align:right;position:relative;">
+        <div class="best-score">{{ r.score }}%</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">{{ metric_label }}</div>
       </div>
       {% endif %}{% endfor %}
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
-      <!-- Model Comparison -->
+    <!-- ── ML PIPELINE STEPS ──────────────────────────── -->
+    {% if preprocessing %}
+    <div class="pipeline-steps-card mb-20">
+      <div class="psc-header">
+        <div style="font-size:14px;font-weight:700;color:var(--black);">ML Pipeline Steps</div>
+        <span class="badge badge-gray">6 steps</span>
+      </div>
+      <div class="pipeline-steps">
+
+        <!-- Step 1: Data Ingestion -->
+        <div class="pstep">
+          <div class="pstep-num">1</div>
+          <div class="pstep-body">
+            <div class="pstep-title">Data Ingestion</div>
+            <div class="pstep-desc">Loaded <strong>{{ preprocessing.original_rows }}</strong> rows · <strong>{{ preprocessing.original_cols }}</strong> columns from <em>{{ dataset_name }}</em></div>
+          </div>
+          <div class="pstep-badge"><span class="badge badge-green">✓ Done</span></div>
+        </div>
+
+        <!-- Step 2: Data Cleaning -->
+        <div class="pstep">
+          <div class="pstep-num">2</div>
+          <div class="pstep-body">
+            <div class="pstep-title">Data Cleaning</div>
+            <div class="pstep-desc">
+              Kept <strong>{{ preprocessing.rows_after_clean }}</strong> rows
+              {% if preprocessing.rows_dropped > 0 %}(removed <strong>{{ preprocessing.rows_dropped }}</strong> rows with missing target){% endif %}.
+              {% if preprocessing.cols_dropped %}Dropped <strong>{{ preprocessing.cols_dropped|length }}</strong> column(s) with >80% missing or constant values.{% else %}All columns retained.{% endif %}
+            </div>
+          </div>
+          <div class="pstep-badge"><span class="badge badge-green">✓ Done</span></div>
+        </div>
+
+        <!-- Step 3: Imputation -->
+        <div class="pstep">
+          <div class="pstep-num">3</div>
+          <div class="pstep-body">
+            <div class="pstep-title">Missing Value Imputation</div>
+            <div class="pstep-desc">Numeric columns → median fill · Categorical columns → mode fill</div>
+          </div>
+          <div class="pstep-badge"><span class="badge badge-green">✓ Done</span></div>
+        </div>
+
+        <!-- Step 4: Label Encoding -->
+        <div class="pstep">
+          <div class="pstep-num">4</div>
+          <div class="pstep-body">
+            <div class="pstep-title">Label Encoding</div>
+            {% if preprocessing.encoded_cols %}
+            <div class="pstep-desc">
+              Encoded <strong>{{ preprocessing.encoded_cols|length }}</strong> categorical column(s):
+              {% for col in preprocessing.encoded_cols %}
+                <code>{{ col }}</code>{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+              {% if label_mappings %}
+              <div class="encoding-tags mt-8">
+                {% for col, vals in label_mappings.items %}
+                <div class="enc-tag">
+                  <strong>{{ col }}</strong>:
+                  {% for v in vals %}<span class="enc-val">{{ v }}→{{ forloop.counter0 }}</span>{% if not forloop.last %} {% endif %}{% endfor %}
+                </div>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            {% else %}
+            <div class="pstep-desc">No categorical columns needed encoding (all numeric)</div>
+            {% endif %}
+          </div>
+          <div class="pstep-badge"><span class="badge badge-green">✓ Done</span></div>
+        </div>
+
+        <!-- Step 5: Train/Test Split -->
+        <div class="pstep">
+          <div class="pstep-num">5</div>
+          <div class="pstep-body">
+            <div class="pstep-title">Train / Test Split (80/20)</div>
+            <div class="pstep-desc">
+              <strong>{{ preprocessing.n_train }}</strong> training samples ·
+              <strong>{{ preprocessing.n_test }}</strong> test samples ·
+              <strong>{{ preprocessing.cols_after|add:"-1" }}</strong> features · random_state=42
+              <div class="split-bar mt-8">
+                <div class="split-train" style="width:{% widthratio preprocessing.n_train preprocessing.rows_after_clean 100 %}%">Train {{ preprocessing.n_train }}</div>
+                <div class="split-test" style="width:{% widthratio preprocessing.n_test preprocessing.rows_after_clean 100 %}%">Test {{ preprocessing.n_test }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="pstep-badge"><span class="badge badge-green">✓ Done</span></div>
+        </div>
+
+        <!-- Step 6: Feature Scaling -->
+        <div class="pstep">
+          <div class="pstep-num">6</div>
+          <div class="pstep-body">
+            <div class="pstep-title">Feature Scaling (StandardScaler)</div>
+            <div class="pstep-desc">All features normalized to mean=0, std=1 for unbiased training</div>
+          </div>
+          <div class="pstep-badge"><span class="badge badge-green">✓ Done</span></div>
+        </div>
+
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ── MODEL COMPARISON + FEATURE IMPORTANCE ──── -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+
       <div class="card">
         <div class="card-header">
-          <div>
-            <div class="card-title">Model Comparison</div>
-            <div class="card-subtitle">All trained models ranked by {{ metric_label }}</div>
-          </div>
+          <div><div class="card-title">Model Comparison</div><div class="card-subtitle">Ranked by {{ metric_label }}</div></div>
+          <span class="badge badge-gray">{{ results|length }} models</span>
         </div>
         {% for r in results %}
         <div class="model-card {% if r.name == best_model %}best{% endif %}">
           <div class="model-card-left">
             <div class="model-name">{{ r.name }}</div>
-            <div class="model-meta">{% if r.name == best_model %}Best model · {% endif %}{{ metric_label }}</div>
+            <div class="model-meta">{% if r.name == best_model %}🏆 Best · {% endif %}{{ metric_label }}</div>
           </div>
           <div class="score-bar">
-            <div class="score-bar-fill" data-width="{{ r.score }}" style="width:0%"></div>
+            <div class="score-bar-fill {% if r.name == best_model %}best{% endif %}" data-width="{{ r.score }}" style="width:0%"></div>
           </div>
           <div class="model-score">{{ r.score }}%</div>
         </div>
         {% endfor %}
+        {% if charts.model_comparison %}
+        <div class="mt-16">
+          <img src="data:image/png;base64,{{ charts.model_comparison }}" alt="Model Comparison" style="width:100%;border-radius:var(--radius);">
+        </div>
+        {% endif %}
       </div>
 
-      <!-- Feature Importance -->
-      {% if feature_importance %}
       <div class="card">
         <div class="card-header">
-          <div>
-            <div class="card-title">Feature Importance</div>
-            <div class="card-subtitle">Top drivers from {{ best_model }}</div>
-          </div>
+          <div><div class="card-title">Feature Importance</div><div class="card-subtitle">Top drivers — {{ best_model }}</div></div>
         </div>
-        {% with max_val=feature_importance.0.importance %}
-        {% for fi in feature_importance %}
-        <div class="feat-row">
-          <div class="feat-name" title="{{ fi.feature }}">{{ fi.feature }}</div>
-          <div class="feat-bar">
-            <div class="feat-bar-fill" data-width="{% widthratio fi.importance max_val 100 %}" style="width:0%"></div>
+        {% if feature_importance %}
+          {% with max_val=feature_importance.0.importance %}
+          {% for fi in feature_importance %}
+          <div class="feat-row">
+            <div class="feat-name" title="{{ fi.feature }}">{{ fi.feature }}</div>
+            <div class="feat-bar">
+              <div class="feat-bar-fill" data-width="{% widthratio fi.importance max_val 100 %}" style="width:0%"></div>
+            </div>
+            <div class="feat-val">{{ fi.importance }}</div>
           </div>
-          <div class="feat-val">{{ fi.importance }}</div>
+          {% endfor %}
+          {% endwith %}
+          {% if charts.feature_importance %}
+          <div class="mt-16">
+            <img src="data:image/png;base64,{{ charts.feature_importance }}" alt="Feature Importance" style="width:100%;border-radius:var(--radius);">
+          </div>
+          {% endif %}
+        {% else %}
+          <p class="text-muted">Feature importance not available for {{ best_model }}.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ── PERFORMANCE METRICS ───────────────────────── -->
+    {% if extra_metrics %}
+    <div class="card mb-20">
+      <div class="card-header">
+        <div><div class="card-title">Performance Metrics</div><div class="card-subtitle">Detailed evaluation of {{ best_model }}</div></div>
+        <span class="badge badge-black">{{ problem_type }}</span>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-box highlight">
+          <div class="metric-val">{% for r in results %}{% if r.name == best_model %}{{ r.score }}%{% endif %}{% endfor %}</div>
+          <div class="metric-lbl">{{ metric_label }}</div>
+        </div>
+        {% for key, val in extra_metrics.items %}
+        <div class="metric-box">
+          <div class="metric-val">{{ val }}{% if val != val|stringformat:"f" %}{% else %}{% if key == 'Precision' or key == 'Recall' or key == 'F1 Score' %}%{% endif %}{% endif %}</div>
+          <div class="metric-lbl">{{ key }}</div>
         </div>
         {% endfor %}
-        {% endwith %}
+      </div>
+      {% if charts.confusion %}
+      <div class="mt-16">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Confusion Matrix</div>
+        <img src="data:image/png;base64,{{ charts.confusion }}" alt="Confusion Matrix" style="max-width:340px;border-radius:var(--radius);display:block;">
+      </div>
+      {% endif %}
+      {% if charts.actual_vs_pred %}
+      <div class="mt-16">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Actual vs Predicted</div>
+        <img src="data:image/png;base64,{{ charts.actual_vs_pred }}" alt="Actual vs Predicted" style="max-width:420px;border-radius:var(--radius);display:block;">
       </div>
       {% endif %}
     </div>
+    {% endif %}
 
-    <!-- Summary table -->
+    <!-- ── INSIGHTS ───────────────────────────────────── -->
+    {% if insights %}
+    <div class="card mb-20">
+      <div class="card-header">
+        <div><div class="card-title">Auto-Generated Insights</div><div class="card-subtitle">Summary observations from this training run</div></div>
+        <span class="badge badge-blue">{{ insights|length }} insights</span>
+      </div>
+      <div class="insights-list">
+        {% for ins in insights %}
+        <div class="insight-item">
+          <div class="insight-dot"></div>
+          <div class="insight-text">{{ ins|safe }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ── FULL RESULTS TABLE ─────────────────────────── -->
     <div class="card mb-24">
       <div class="card-header">
         <div class="card-title">Full Run Summary</div>
-        <span class="badge badge-gray">{{ results|length }} models</span>
+        <span class="badge badge-gray">{{ results|length }} models trained</span>
       </div>
       <div class="table-wrap">
         <table>
@@ -129,7 +285,7 @@
               <td><strong style="color:var(--black)">{{ r.score }}%</strong></td>
               <td>
                 {% if r.name == best_model %}
-                  <span class="badge badge-green">✓ Best</span>
+                  <span class="badge badge-green">🏆 Best</span>
                 {% else %}
                   <span class="badge badge-gray">Trained</span>
                 {% endif %}
@@ -141,12 +297,78 @@
       </div>
     </div>
 
-    <div class="flex gap-12 mb-32">
+    <div class="flex gap-12 mb-32" style="flex-wrap:wrap;">
       <a href="{% url 'select_target' %}" class="btn btn-outline btn-md">← Retrain</a>
       <a href="{% url 'predict' %}" class="btn btn-primary btn-md">Make Predictions →</a>
       <a href="{% url 'download_model' %}" class="btn btn-ghost btn-md">↓ Download Model</a>
+      <a href="{% url 'report_pdf' %}" class="btn btn-ghost btn-md">📄 Download PDF Report</a>
     </div>
   </div>
 </div>
 
+<style>
+.best-banner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 24px;
+  background: var(--black);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.best-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 0% 50%, rgba(255,255,255,0.05) 0%, transparent 60%);
+}
+.best-eyebrow { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; color: rgba(255,255,255,0.45); margin-bottom: 8px; position: relative; }
+.best-name { font-size: 20px; font-weight: 700; color: white; letter-spacing: -0.4px; position: relative; }
+.best-meta { font-size: 13px; color: rgba(255,255,255,0.5); position: relative; }
+.best-score { font-size: 42px; font-weight: 800; color: #4ade80; letter-spacing: -2px; line-height: 1; position: relative; }
+
+/* Pipeline steps */
+.pipeline-steps-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.psc-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--bg-subtle); }
+.pipeline-steps { padding: 8px 0; }
+.pstep { display: flex; align-items: flex-start; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+.pstep:last-child { border-bottom: none; }
+.pstep:hover { background: var(--bg-subtle); }
+.pstep-num { width: 26px; height: 26px; background: var(--black); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+.pstep-body { flex: 1; }
+.pstep-title { font-size: 13.5px; font-weight: 700; color: var(--black); margin-bottom: 4px; }
+.pstep-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.pstep-badge { flex-shrink: 0; }
+.pstep-desc code { background: var(--bg-muted); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 11.5px; color: var(--text-2); font-family: monospace; }
+
+/* Encoding tags */
+.encoding-tags { display: flex; flex-direction: column; gap: 4px; }
+.enc-tag { font-size: 12px; color: var(--text-2); }
+.enc-val { background: var(--bg-muted); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 11px; font-family: monospace; margin-right: 4px; }
+
+/* Split bar */
+.split-bar { display: flex; border-radius: 100px; overflow: hidden; height: 20px; font-size: 11px; font-weight: 600; }
+.split-train { background: var(--black); color: white; display: flex; align-items: center; justify-content: center; padding: 0 8px; }
+.split-test  { background: var(--bg-muted); color: var(--muted); display: flex; align-items: center; justify-content: center; padding: 0 8px; border: 1px solid var(--border); }
+
+/* Metrics */
+.metrics-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.metric-box { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px; min-width: 110px; }
+.metric-box.highlight { background: var(--black); border-color: var(--black); }
+.metric-box.highlight .metric-val { color: #4ade80; }
+.metric-box.highlight .metric-lbl { color: rgba(255,255,255,0.5); }
+.metric-val { font-size: 24px; font-weight: 800; color: var(--black); letter-spacing: -0.8px; }
+.metric-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; color: var(--muted2); margin-top: 3px; }
+
+/* Insights */
+.insights-list { display: flex; flex-direction: column; gap: 10px; }
+.insight-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--bg-subtle); border-radius: var(--radius); }
+.insight-dot { width: 7px; height: 7px; background: var(--black); border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.insight-text { font-size: 13.5px; color: var(--text-2); line-height: 1.6; }
+
+/* Score bar best */
+.score-bar-fill.best { background: var(--success) !important; }
+</style>
 {% endblock %}

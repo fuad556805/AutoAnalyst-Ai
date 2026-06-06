@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Visualize — {{ dataset_name }} — AutoAnalyst AI{% endblock %}
+{% block content %}
+
+<div class="sidebar-layout">
+  <aside class="sidebar">
+    <a href="{% url 'home' %}" class="sidebar-brand">
+      <div class="sb-logo-icon">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/></svg>
+      </div>
+      <div class="sb-text"><div class="sb-name">AutoAnalyst</div><div class="sb-sub">AI Platform</div></div>
+    </a>
+    <ul class="sidebar-nav">
+      <li><a href="{% url 'home' %}"><span class="nav-icon">⊞</span> Dashboard</a></li>
+      <li><a href="{% url 'upload' %}"><span class="nav-icon">↑</span> Upload Data</a></li>
+      <li><a href="{% url 'preview' %}"><span class="nav-icon">◫</span> Preview</a></li>
+      <li><a href="{% url 'visualize' %}" class="active"><span class="nav-icon">◈</span> Visualize</a></li>
+      <li><a href="{% url 'select_target' %}"><span class="nav-icon">◎</span> Select Target</a></li>
+      <li><a href="{% url 'results' %}"><span class="nav-icon">▤</span> Results</a></li>
+      <li><a href="{% url 'predict' %}"><span class="nav-icon">⚡</span> Predict</a></li>
+    </ul>
+  </aside>
+
+  <div class="page-content">
+    <div class="page-header">
+      <h1>Data Visualization</h1>
+      <p>{{ dataset_name }} &nbsp;·&nbsp; {{ n_charts }} chart{{ n_charts|pluralize }} generated{% if target %} &nbsp;·&nbsp; Target: <strong>{{ target }}</strong>{% endif %}</p>
+    </div>
+
+    <div class="progress-track mb-32">
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Upload</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Preview</div></div>
+      <div class="progress-step active"><div class="progress-step-dot">3</div><div class="progress-step-label">Visualize</div></div>
+      <div class="progress-step"><div class="progress-step-dot">4</div><div class="progress-step-label">Target</div></div>
+      <div class="progress-step"><div class="progress-step-dot">5</div><div class="progress-step-label">Train</div></div>
+      <div class="progress-step"><div class="progress-step-dot">6</div><div class="progress-step-label">Results</div></div>
+      <div class="progress-step"><div class="progress-step-dot">7</div><div class="progress-step-label">Predict</div></div>
+    </div>
+
+    {% if not charts %}
+    <div class="card text-center" style="padding:48px 32px;">
+      <div style="font-size:36px;margin-bottom:16px;">📊</div>
+      <h3 style="font-size:16px;font-weight:700;color:var(--black);margin-bottom:8px;">No visualizations yet</h3>
+      <p class="text-muted">Upload a dataset and come back here to see charts.</p>
+      <a href="{% url 'upload' %}" class="btn btn-primary btn-md mt-16">Upload Dataset →</a>
+    </div>
+    {% else %}
+
+    <!-- Target distribution (pinned top if present) -->
+    {% for chart in charts %}{% if chart.type == 'target' %}
+    <div class="card mb-24">
+      <div class="card-header">
+        <div><div class="card-title">{{ chart.title }}</div><div class="card-subtitle">Distribution of the target/label column</div></div>
+        <span class="badge badge-green">Target</span>
+      </div>
+      <img src="data:image/png;base64,{{ chart.img }}" alt="{{ chart.title }}"
+           style="width:100%;max-width:520px;border-radius:var(--radius);display:block;">
+    </div>
+    {% endif %}{% endfor %}
+
+    <!-- Correlation heatmap -->
+    {% for chart in charts %}{% if chart.type == 'heatmap' %}
+    <div class="card mb-24">
+      <div class="card-header">
+        <div><div class="card-title">{{ chart.title }}</div><div class="card-subtitle">Pearson correlation between numeric features (−1 to +1)</div></div>
+        <span class="badge badge-blue">Heatmap</span>
+      </div>
+      <img src="data:image/png;base64,{{ chart.img }}" alt="{{ chart.title }}"
+           style="width:100%;border-radius:var(--radius);display:block;">
+    </div>
+    {% endif %}{% endfor %}
+
+    <!-- Distribution & Bar grid -->
+    <div class="card mb-24">
+      <div class="card-header">
+        <div><div class="card-title">Feature Distributions</div><div class="card-subtitle">Histograms for numeric columns · Bar charts for categorical columns</div></div>
+        <span class="badge badge-gray">{{ n_charts }} charts</span>
+      </div>
+      <div class="viz-grid">
+        {% for chart in charts %}{% if chart.type == 'histogram' or chart.type == 'bar' %}
+        <div class="viz-card">
+          <div class="viz-card-head">
+            <span class="viz-title">{{ chart.title }}</span>
+            <span class="badge badge-gray" style="font-size:10px;">{% if chart.type == 'histogram' %}numeric{% else %}categorical{% endif %}</span>
+          </div>
+          <img src="data:image/png;base64,{{ chart.img }}" alt="{{ chart.title }}"
+               style="width:100%;border-radius:var(--radius-sm);">
+        </div>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+
+    <div class="flex gap-12 mb-32">
+      <a href="{% url 'preview' %}" class="btn btn-outline btn-md">← Preview</a>
+      <a href="{% url 'select_target' %}" class="btn btn-primary btn-md">Select Target →</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.viz-card {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  transition: box-shadow 0.15s;
+}
+.viz-card:hover { box-shadow: var(--shadow); }
+.viz-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.viz-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+</style>
+{% endblock %}

@@ -7,22 +7,15 @@
   <aside class="sidebar">
     <a href="{% url 'home' %}" class="sidebar-brand">
       <div class="sb-logo-icon">
-        <svg viewBox="0 0 16 16" fill="none">
-          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
-          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
-          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
-          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
-        </svg>
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/></svg>
       </div>
-      <div class="sb-text">
-        <div class="sb-name">AutoAnalyst</div>
-        <div class="sb-sub">AI Platform</div>
-      </div>
+      <div class="sb-text"><div class="sb-name">AutoAnalyst</div><div class="sb-sub">AI Platform</div></div>
     </a>
     <ul class="sidebar-nav">
       <li><a href="{% url 'home' %}"><span class="nav-icon">⊞</span> Dashboard</a></li>
       <li><a href="{% url 'upload' %}"><span class="nav-icon">↑</span> Upload Data</a></li>
       <li><a href="{% url 'preview' %}" class="active"><span class="nav-icon">◫</span> Preview</a></li>
+      <li><a href="{% url 'visualize' %}"><span class="nav-icon">◈</span> Visualize</a></li>
       <li><a href="{% url 'select_target' %}"><span class="nav-icon">◎</span> Select Target</a></li>
       <li><a href="{% url 'results' %}"><span class="nav-icon">▤</span> Results</a></li>
       <li><a href="{% url 'predict' %}"><span class="nav-icon">⚡</span> Predict</a></li>
@@ -30,24 +23,34 @@
   </aside>
 
   <div class="page-content">
-    <div class="page-header">
-      <h1>Dataset Preview</h1>
-      <p>{{ dataset_name }}</p>
+    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;">
+      <div>
+        <h1>Dataset Preview</h1>
+        <p>{{ dataset_name }}</p>
+      </div>
+      <form method="post" action="{% url 'delete_dataset' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm" style="background:var(--error-bg);color:var(--error);border:1px solid var(--error-border);"
+          onclick="return confirm('Delete this dataset and clear all results?')">
+          🗑 Delete Dataset
+        </button>
+      </form>
     </div>
 
     <div class="progress-track mb-32">
       <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Upload</div></div>
       <div class="progress-step active"><div class="progress-step-dot">2</div><div class="progress-step-label">Preview</div></div>
-      <div class="progress-step"><div class="progress-step-dot">3</div><div class="progress-step-label">Target</div></div>
-      <div class="progress-step"><div class="progress-step-dot">4</div><div class="progress-step-label">Train</div></div>
-      <div class="progress-step"><div class="progress-step-dot">5</div><div class="progress-step-label">Results</div></div>
-      <div class="progress-step"><div class="progress-step-dot">6</div><div class="progress-step-label">Predict</div></div>
+      <div class="progress-step"><div class="progress-step-dot">3</div><div class="progress-step-label">Visualize</div></div>
+      <div class="progress-step"><div class="progress-step-dot">4</div><div class="progress-step-label">Target</div></div>
+      <div class="progress-step"><div class="progress-step-dot">5</div><div class="progress-step-label">Train</div></div>
+      <div class="progress-step"><div class="progress-step-dot">6</div><div class="progress-step-label">Results</div></div>
+      <div class="progress-step"><div class="progress-step-dot">7</div><div class="progress-step-label">Predict</div></div>
     </div>
 
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-value">{{ rows }}</div>
-        <div class="stat-label">Rows</div>
+        <div class="stat-label">Total Rows</div>
       </div>
       <div class="stat-card">
         <div class="stat-value">{{ cols }}</div>
@@ -57,55 +60,17 @@
         <div class="stat-value">{{ duplicates }}</div>
         <div class="stat-label">Duplicates</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ missing_total }}</div>
+        <div class="stat-label">Missing Cells</div>
+      </div>
     </div>
 
+    <!-- First 10 rows preview -->
     <div class="card mb-20">
       <div class="card-header">
-        <div>
-          <div class="card-title">Column Profiling</div>
-          <div class="card-subtitle">Data types, missing values, and basic statistics per column</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Column</th>
-              <th>Type</th>
-              <th>Missing</th>
-              <th>Unique</th>
-              <th>Min</th>
-              <th>Max</th>
-              <th>Mean</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for stat in col_stats %}
-            <tr>
-              <td><strong style="color:var(--black)">{{ stat.name }}</strong></td>
-              <td><span class="badge badge-gray" style="font-family:monospace">{{ stat.dtype }}</span></td>
-              <td>
-                {% if stat.missing > 0 %}
-                  <span class="badge badge-yellow">{{ stat.missing }} ({{ stat.missing_pct }}%)</span>
-                {% else %}
-                  <span class="badge badge-green">None</span>
-                {% endif %}
-              </td>
-              <td>{{ stat.unique }}</td>
-              <td class="text-muted">{{ stat.min }}</td>
-              <td class="text-muted">{{ stat.max }}</td>
-              <td class="text-muted">{{ stat.mean }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card mb-24">
-      <div class="card-header">
-        <div class="card-title">Data Preview</div>
-        <span class="badge badge-gray">First 10 rows</span>
+        <div><div class="card-title">Data Preview</div><div class="card-subtitle">First 10 rows of {{ dataset_name }}</div></div>
+        <span class="badge badge-gray">10 of {{ rows }} rows</span>
       </div>
       <div class="table-wrap">
         <table>
@@ -121,9 +86,44 @@
       </div>
     </div>
 
+    <!-- Column profiling -->
+    <div class="card mb-24">
+      <div class="card-header">
+        <div><div class="card-title">Column Profiling</div><div class="card-subtitle">Data types, missing values, and statistics per column</div></div>
+        <span class="badge badge-gray">{{ cols }} columns</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Column</th><th>Type</th><th>Missing</th><th>Unique</th><th>Min</th><th>Max</th><th>Mean / Top</th></tr>
+          </thead>
+          <tbody>
+            {% for stat in col_stats %}
+            <tr>
+              <td><strong style="color:var(--black)">{{ stat.name }}</strong></td>
+              <td><span class="badge badge-gray" style="font-family:monospace;font-size:11px;">{{ stat.dtype }}</span></td>
+              <td>
+                {% if stat.missing > 0 %}
+                  <span class="badge badge-yellow">{{ stat.missing }} ({{ stat.missing_pct }}%)</span>
+                {% else %}
+                  <span class="badge badge-green">None</span>
+                {% endif %}
+              </td>
+              <td>{{ stat.unique }}</td>
+              <td class="text-muted">{{ stat.min }}</td>
+              <td class="text-muted">{{ stat.max }}</td>
+              <td class="text-muted">{% if stat.mean != 'N/A' %}{{ stat.mean }}{% else %}{{ stat.top|default:'N/A' }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="flex gap-12 mb-32">
       <a href="{% url 'upload' %}" class="btn btn-outline btn-md">← Re-upload</a>
-      <a href="{% url 'select_target' %}" class="btn btn-primary btn-md">Select Target Column →</a>
+      <a href="{% url 'visualize' %}" class="btn btn-ghost btn-md">View Charts →</a>
+      <a href="{% url 'select_target' %}" class="btn btn-primary btn-md">Select Target →</a>
     </div>
   </div>
 </div>

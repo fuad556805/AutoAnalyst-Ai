@@ -7,22 +7,15 @@
   <aside class="sidebar">
     <a href="{% url 'home' %}" class="sidebar-brand">
       <div class="sb-logo-icon">
-        <svg viewBox="0 0 16 16" fill="none">
-          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
-          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
-          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
-          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
-        </svg>
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/></svg>
       </div>
-      <div class="sb-text">
-        <div class="sb-name">AutoAnalyst</div>
-        <div class="sb-sub">AI Platform</div>
-      </div>
+      <div class="sb-text"><div class="sb-name">AutoAnalyst</div><div class="sb-sub">AI Platform</div></div>
     </a>
     <ul class="sidebar-nav">
       <li><a href="{% url 'home' %}"><span class="nav-icon">⊞</span> Dashboard</a></li>
       <li><a href="{% url 'upload' %}"><span class="nav-icon">↑</span> Upload Data</a></li>
       <li><a href="{% url 'preview' %}"><span class="nav-icon">◫</span> Preview</a></li>
+      <li><a href="{% url 'visualize' %}"><span class="nav-icon">◈</span> Visualize</a></li>
       <li><a href="{% url 'select_target' %}"><span class="nav-icon">◎</span> Select Target</a></li>
       <li><a href="{% url 'results' %}"><span class="nav-icon">▤</span> Results</a></li>
       <li><a href="{% url 'predict' %}" class="active"><span class="nav-icon">⚡</span> Predict</a></li>
@@ -34,26 +27,27 @@
       <h1>Make a Prediction</h1>
       <p>
         Model: <strong>{{ best_model_name }}</strong>
-        &nbsp;·&nbsp;
-        {{ metric_label }}: <strong style="color:var(--success)">{{ best_score }}%</strong>
+        &nbsp;·&nbsp; Target: <strong>{{ target }}</strong>
+        &nbsp;·&nbsp; {{ metric_label }}: <strong style="color:var(--success)">{{ best_score }}%</strong>
       </p>
     </div>
 
     <div class="progress-track mb-32">
       <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Upload</div></div>
       <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Preview</div></div>
+      <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Visualize</div></div>
       <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Target</div></div>
       <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Train</div></div>
       <div class="progress-step done"><div class="progress-step-dot">✓</div><div class="progress-step-label">Results</div></div>
-      <div class="progress-step active"><div class="progress-step-dot">6</div><div class="progress-step-label">Predict</div></div>
+      <div class="progress-step active"><div class="progress-step-dot">7</div><div class="progress-step-label">Predict</div></div>
     </div>
 
     {% if prediction_result %}
-    <div class="prediction-box">
+    <div class="prediction-box mb-20">
       <div class="prediction-label">{{ prediction_result.label }}</div>
       <div class="prediction-value">{{ prediction_result.value }}</div>
     </div>
-    <div class="explanation">
+    <div class="explanation mb-24">
       💡 {{ prediction_result.explanation|safe }}
     </div>
     {% endif %}
@@ -70,28 +64,95 @@
         <div class="card-header">
           <div>
             <div class="card-title">Input Features</div>
-            <div class="card-subtitle">Enter values for each feature. Leave blank to use 0.</div>
+            <div class="card-subtitle">
+              Fill in the values below. Categorical fields show a dropdown with the original options.
+            </div>
           </div>
           <span class="badge badge-gray">{{ feature_names|length }} features</span>
         </div>
+
+        <!-- Encoding legend -->
+        {% if label_mappings %}
+        <div class="enc-legend mb-16">
+          <div class="enc-legend-title">Categorical Columns (auto-encoded during training)</div>
+          <div class="enc-legend-tags">
+            {% for col, vals in label_mappings.items %}
+            {% if col in feature_names %}
+            <div class="enc-leg-item">
+              <strong>{{ col }}</strong>:
+              {% for v in vals %}<span class="enc-val">{{ v }}</span>{% endfor %}
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
         <div class="predict-grid">
           {% for feat in feature_names %}
           <div class="form-group">
-            <label for="feat_{{ forloop.counter }}">{{ feat }}</label>
-            <input type="number" step="any" name="{{ feat }}" id="feat_{{ forloop.counter }}"
-              value="{{ request.POST|dict_get:feat }}" placeholder="0">
+            <label for="feat_{{ forloop.counter }}">
+              {{ feat }}
+              {% if feat in label_mappings %}
+              <span class="badge badge-blue" style="margin-left:4px;font-size:10px;">categorical</span>
+              {% else %}
+              <span class="badge badge-gray" style="margin-left:4px;font-size:10px;">numeric</span>
+              {% endif %}
+            </label>
+
+            {% if feat in label_mappings %}
+              {# Categorical — show dropdown with original string values #}
+              <select name="{{ feat }}" id="feat_{{ forloop.counter }}">
+                {% for val in label_mappings|dict_get:feat %}
+                <option value="{{ val }}" {% if request.POST|dict_get:feat == val %}selected{% endif %}>{{ val }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              {# Numeric — show number input #}
+              <input type="number" step="any" name="{{ feat }}" id="feat_{{ forloop.counter }}"
+                value="{{ request.POST|dict_get:feat }}" placeholder="0">
+            {% endif %}
           </div>
           {% endfor %}
         </div>
       </div>
 
-      <div class="flex gap-12 mb-32">
+      <div class="flex gap-12 mb-32" style="flex-wrap:wrap;">
         <a href="{% url 'results' %}" class="btn btn-outline btn-md">← Results</a>
         <button type="submit" class="btn btn-primary btn-md">⚡ Run Prediction</button>
         <a href="{% url 'download_model' %}" class="btn btn-ghost btn-md">↓ Download Model</a>
+        <a href="{% url 'report_pdf' %}" class="btn btn-ghost btn-md">📄 PDF Report</a>
       </div>
     </form>
   </div>
 </div>
 
+<style>
+.enc-legend {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.enc-legend-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.enc-legend-tags { display: flex; flex-direction: column; gap: 5px; }
+.enc-leg-item { font-size: 12.5px; color: var(--text-2); }
+.enc-val {
+  display: inline-block;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 12px;
+  margin-left: 4px;
+  font-weight: 500;
+}
+</style>
 {% endblock %}
