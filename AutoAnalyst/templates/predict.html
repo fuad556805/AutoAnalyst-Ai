@@ -2,59 +2,90 @@
 {% load dict_filters %}
 {% block title %}Predict — AutoAnalyst AI{% endblock %}
 {% block content %}
-<div class="container-md">
-  <div class="page-header">
-    <h1>Make a Prediction</h1>
-    <p>Model: <strong style="color:var(--white)">{{ best_model_name }}</strong> &bull; {{ metric_label }}: <strong style="color:var(--success)">{{ best_score }}%</strong></p>
-  </div>
 
-  <div class="progress-track">
-    <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Upload</div></div>
-    <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Preview</div></div>
-    <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Target</div></div>
-    <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Train</div></div>
-    <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Results</div></div>
-    <div class="progress-step active"><div class="progress-step-circle">6</div><div class="progress-step-label">Predict</div></div>
-  </div>
-
-  {% if prediction_result %}
-  <div class="prediction-box">
-    <div class="prediction-label">{{ prediction_result.label }}</div>
-    <div class="prediction-value">{{ prediction_result.value }}</div>
-  </div>
-  <div class="explanation mb-24">
-    💡 {{ prediction_result.explanation|safe }}
-  </div>
-  {% endif %}
-
-  {% if error_msg %}
-  <div class="card mb-20" style="border-color:var(--error); background:rgba(239,68,68,0.06);">
-    <p style="color:var(--error); font-size:0.9rem;">⚠ Prediction error: {{ error_msg }}</p>
-  </div>
-  {% endif %}
-
-  <form method="post">
-    {% csrf_token %}
-    <div class="card mb-20">
-      <div class="card-header">
-        <div class="card-title">Input Features</div>
-        <div class="card-subtitle">Enter values for each feature to get a prediction</div>
-      </div>
-      <div class="predict-grid">
-        {% for feat in feature_names %}
-        <div class="form-group">
-          <label for="feat_{{ forloop.counter }}">{{ feat }}</label>
-          <input type="number" step="any" name="{{ feat }}" id="feat_{{ forloop.counter }}"
-            value="{{ request.POST|dict_get:feat }}" placeholder="0">
+<div class="sidebar-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div style="width:24px;height:24px;background:var(--black);border-radius:5px;display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
+            <rect x="1" y="1" width="6" height="6" rx="1" fill="white"/>
+            <rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
+            <rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
+            <rect x="9" y="9" width="6" height="6" rx="1" fill="white"/>
+          </svg>
         </div>
-        {% endfor %}
+        <span class="sb-name">AutoAnalyst</span>
       </div>
+      <span class="sb-sub">AI Platform</span>
     </div>
-    <div class="flex gap-12 mb-32">
-      <a href="{% url 'results' %}" class="btn btn-outline btn-md">← Results</a>
-      <button type="submit" class="btn btn-primary btn-md">🔮 Predict</button>
-      <a href="{% url 'download_model' %}" class="btn btn-ghost btn-md">💾 Download Model</a>
+    <ul class="sidebar-nav">
+      <li><a href="{% url 'home' %}"><span class="nav-icon">⊞</span> Dashboard</a></li>
+      <li><a href="{% url 'upload' %}"><span class="nav-icon">↑</span> Upload Data</a></li>
+      <li><a href="{% url 'preview' %}"><span class="nav-icon">⊡</span> Preview</a></li>
+      <li><a href="{% url 'select_target' %}"><span class="nav-icon">◎</span> Select Target</a></li>
+      <li><a href="{% url 'results' %}"><span class="nav-icon">▤</span> Results</a></li>
+      <li><a href="{% url 'predict' %}" class="active"><span class="nav-icon">⚡</span> Predict</a></li>
+    </ul>
+  </aside>
+
+  <div class="sidebar-content">
+    <div class="page-header">
+      <h1>Make a Prediction</h1>
+      <p>Model: <strong>{{ best_model_name }}</strong> &bull; {{ metric_label }}: <strong style="color:var(--success)">{{ best_score }}%</strong></p>
     </div>
-  </form>
+
+    <div class="progress-track mb-32">
+      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Upload</div></div>
+      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Preview</div></div>
+      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Target</div></div>
+      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Train</div></div>
+      <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Results</div></div>
+      <div class="progress-step active"><div class="progress-step-circle">6</div><div class="progress-step-label">Predict</div></div>
+    </div>
+
+    {% if prediction_result %}
+    <div class="prediction-box">
+      <div class="prediction-label">{{ prediction_result.label }}</div>
+      <div class="prediction-value">{{ prediction_result.value }}</div>
+    </div>
+    <div class="explanation mb-24">
+      💡 {{ prediction_result.explanation|safe }}
+    </div>
+    {% endif %}
+
+    {% if error_msg %}
+    <div class="card mb-20" style="border-color:var(--error);">
+      <p style="color:var(--error);font-size:0.875rem;font-weight:500;">⚠ Prediction error: {{ error_msg }}</p>
+    </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="card mb-20">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Input Features</div>
+            <div class="card-subtitle">Enter values for each feature to get a prediction</div>
+          </div>
+        </div>
+        <div class="predict-grid">
+          {% for feat in feature_names %}
+          <div class="form-group">
+            <label for="feat_{{ forloop.counter }}">{{ feat }}</label>
+            <input type="number" step="any" name="{{ feat }}" id="feat_{{ forloop.counter }}"
+              value="{{ request.POST|dict_get:feat }}" placeholder="0">
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="flex gap-12 mb-32">
+        <a href="{% url 'results' %}" class="btn btn-outline btn-md">← Results</a>
+        <button type="submit" class="btn btn-primary btn-md">⚡ Predict Now</button>
+        <a href="{% url 'download_model' %}" class="btn btn-ghost btn-md">↓ Download Model</a>
+      </div>
+    </form>
+  </div>
 </div>
+
 {% endblock %}

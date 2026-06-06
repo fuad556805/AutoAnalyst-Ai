@@ -1,10 +1,21 @@
 {% extends 'base.html' %}
-{% block title %}Login — AutoAnalyst AI{% endblock %}
+{% block title %}Sign In — AutoAnalyst AI{% endblock %}
 {% block content %}
 <div class="auth-wrap">
   <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">
+        <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+          <rect x="1" y="1" width="6" height="6" rx="1" fill="white"/>
+          <rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
+          <rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
+          <rect x="9" y="9" width="6" height="6" rx="1" fill="white"/>
+        </svg>
+      </div>
+      <span class="auth-logo-text">AutoAnalyst AI</span>
+    </div>
     <h1 class="auth-title">Welcome back</h1>
-    <p class="auth-subtitle">Sign in to your AutoAnalyst account</p>
+    <p class="auth-subtitle">Sign in to your account to continue.</p>
     <form method="post">
       {% csrf_token %}
       <div class="form-group">
@@ -16,9 +27,9 @@
         <input type="password" name="password" id="id_password" placeholder="Enter password" autocomplete="current-password" required>
       </div>
       {% if form.errors %}
-      <p style="color:var(--error); font-size:0.85rem; margin-bottom:14px;">Invalid username or password.</p>
+      <p style="color:var(--error);font-size:0.8375rem;margin-bottom:14px;font-weight:500;">Invalid username or password.</p>
       {% endif %}
-      <button type="submit" class="btn btn-primary btn-md" style="width:100%; margin-top:4px;">Sign In</button>
+      <button type="submit" class="btn btn-primary btn-md" style="width:100%;margin-top:4px;">Sign In →</button>
     </form>
     <div class="auth-footer">
       Don't have an account? <a href="{% url 'signup' %}">Sign Up</a>
