@@ -30,9 +30,7 @@
 
   <ul class="nav-links">
     <li><a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>Home</a></li>
-    {% if user.is_authenticated %}
     <li><a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
-    {% endif %}
     <li><a href="{% url 'upload' %}" {% if request.resolver_match.url_name == 'upload' %}class="active"{% endif %}>Upload</a></li>
     <li><a href="{% url 'visualize' %}" {% if request.resolver_match.url_name == 'visualize' %}class="active"{% endif %}>Visualize</a></li>
     <li><a href="{% url 'results' %}" {% if request.resolver_match.url_name == 'results' %}class="active"{% endif %}>Results</a></li>
@@ -41,14 +39,14 @@
 
   <div class="nav-auth">
     {% if user.is_authenticated %}
-      <a href="{% url 'dashboard' %}" class="btn btn-outline btn-sm">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;margin-right:4px;vertical-align:-1px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        {{ user.username }}
-      </a>
-      <a href="{% url 'logout' %}" class="btn btn-outline btn-sm">Sign Out</a>
+      <a href="{% url 'dashboard' %}" class="btn btn-outline btn-sm">{{ user.username }}</a>
+      <form method="post" action="{% url 'logout' %}" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline btn-sm">Sign Out</button>
+      </form>
     {% else %}
       <a href="{% url 'login' %}" class="btn btn-outline btn-sm">Sign In</a>
-      <a href="{% url 'upload' %}" class="btn btn-primary btn-sm">Upload Dataset</a>
+      <a href="{% url 'signup' %}" class="btn btn-primary btn-sm">Sign Up</a>
     {% endif %}
   </div>
 
@@ -130,12 +128,15 @@
       <div class="nav-mobile-user-avatar">{{ user.username|slice:":1"|upper }}</div>
       <span class="nav-mobile-user-name">{{ user.username }}</span>
     </div>
-    <a href="{% url 'logout' %}" class="nav-mobile-link nav-mobile-link-danger">
-      <span class="nav-mobile-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </span>
-      Sign Out
-    </a>
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="nav-mobile-link nav-mobile-link-danger" style="width:100%;background:none;border:none;cursor:pointer;text-align:left;">
+        <span class="nav-mobile-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </span>
+        Sign Out
+      </button>
+    </form>
   {% else %}
     <a href="{% url 'login' %}" class="nav-mobile-link">
       <span class="nav-mobile-icon">

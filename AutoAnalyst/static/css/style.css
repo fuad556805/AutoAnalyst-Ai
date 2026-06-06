@@ -1070,10 +1070,10 @@ footer {
 }
 .dash-stat-icon svg { width: 17px; height: 17px; }
 
-.dash-stat-icon--datasets  { background: #09090b; color: white; }
-.dash-stat-icon--models    { background: #09090b; color: white; }
-.dash-stat-icon--predictions { background: #09090b; color: white; }
-.dash-stat-icon--score     { background: #f0fdf4; color: #16a34a; }
+.dash-stat-icon--datasets    { background: #f4f4f5; color: #3f3f46; }
+.dash-stat-icon--models      { background: #eff6ff; color: #2563eb; }
+.dash-stat-icon--predictions { background: #faf5ff; color: #7c3aed; }
+.dash-stat-icon--score       { background: #f0fdf4; color: #16a34a; }
 
 .dash-stat-value {
   font-size: 26px;
@@ -1230,13 +1230,12 @@ footer {
   letter-spacing: 0.3px;
 }
 .dash-pill--clf {
-  background: #09090b;
-  color: white;
+  background: #e0e7ff;
+  color: #3730a3;
 }
 .dash-pill--reg {
-  background: var(--bg-muted);
-  color: var(--text-2);
-  border: 1px solid var(--border);
+  background: #fef9c3;
+  color: #854d0e;
 }
 
 /* Score column */
