@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Select Target — AutoAnalyst AI{% endblock %}
+{% block content %}
+<div class="container-md">
+  <div class="page-header">
+    <h1>Select Target Column</h1>
+    <p>Choose the column you want the model to predict.</p>
+  </div>
+
+  <div class="progress-track">
+    <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Upload</div></div>
+    <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Preview</div></div>
+    <div class="progress-step active"><div class="progress-step-circle">3</div><div class="progress-step-label">Target</div></div>
+    <div class="progress-step"><div class="progress-step-circle">4</div><div class="progress-step-label">Train</div></div>
+    <div class="progress-step"><div class="progress-step-circle">5</div><div class="progress-step-label">Results</div></div>
+    <div class="progress-step"><div class="progress-step-circle">6</div><div class="progress-step-label">Predict</div></div>
+  </div>
+
+  <form method="post" id="train-form">
+    {% csrf_token %}
+    <div class="card mb-20">
+      <div class="card-header">
+        <div class="card-title">Available Columns</div>
+        <div class="card-subtitle">Select the column that represents your prediction target (label/output)</div>
+      </div>
+      <div class="radio-group">
+        {% for col in columns %}
+        <label class="radio-card">
+          <input type="radio" name="target_column" value="{{ col }}"
+            {% if col == suggested_target %}checked{% endif %}>
+          <div class="radio-card-info">
+            <h4>{{ col }}</h4>
+            {% if col == suggested_target %}
+              <p>Suggested target column</p>
+            {% endif %}
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card mb-24" style="background:var(--dark3);">
+      <p class="text-sm" style="color:var(--muted);">
+        🧠 AutoAnalyst will automatically detect if this is a <strong style="color:var(--text)">classification</strong> or <strong style="color:var(--text)">regression</strong> problem based on the values in your chosen column.
+      </p>
+    </div>
+
+    <div class="flex gap-12 mb-32">
+      <a href="{% url 'preview' %}" class="btn btn-outline btn-md">← Preview</a>
+      <button type="submit" class="btn btn-primary btn-md">Train Models →</button>
+    </div>
+  </form>
+
+  <div class="loading-overlay hidden" id="loading-overlay">
+    <div class="spinner"></div>
+    <h3>Training ML Models...</h3>
+    <p>This may take a few seconds. Please wait.</p>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelector('#train-form').addEventListener('submit', function() {
+  document.querySelector('#loading-overlay').classList.remove('hidden');
+});
+</script>
+{% endblock %}

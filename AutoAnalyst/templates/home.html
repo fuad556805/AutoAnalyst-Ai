@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}AutoAnalyst AI — Automatic ML Platform{% endblock %}
+{% block content %}
+<div class="container">
+  <section class="hero">
+    <div class="hero-badge">🤖 AutoML &bull; Powered by scikit-learn</div>
+    <h1>Analyze Data &amp; Train<br><span>ML Models Automatically</span></h1>
+    <p>Upload your CSV or XLSX dataset, and AutoAnalyst AI will profile it, detect the problem type, train multiple models, and give you the best one — no code required.</p>
+    <div class="hero-actions">
+      <a href="{% url 'upload' %}" class="btn btn-primary btn-xl">Upload Dataset</a>
+      <a href="#how-it-works" class="btn btn-outline btn-xl">How it works</a>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Auto Data Profiling</h3>
+        <p>Missing values, duplicates, data types, statistics — all analyzed instantly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>Smart Model Training</h3>
+        <p>Trains classification and regression models automatically using scikit-learn.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h3>Best Model Selection</h3>
+        <p>Compares all models and selects the best one based on accuracy or R² score.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔮</div>
+        <h3>Live Predictions</h3>
+        <p>Make predictions on new data instantly using the trained best model.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💡</div>
+        <h3>Explainable AI</h3>
+        <p>Feature importance charts explain which variables drive model decisions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💾</div>
+        <h3>Download Model</h3>
+        <p>Export your trained model as a joblib file for use in your own projects.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works" style="padding: 40px 0 60px;">
+    <h2 class="section-title" style="font-size:1.3rem; margin-bottom:24px;">How it works</h2>
+    <div class="steps" style="justify-content:flex-start; gap:12px;">
+      <div class="step done"><span class="step-num">1</span> Upload CSV/XLSX</div>
+      <div class="step done"><span class="step-num">2</span> Preview &amp; Profile</div>
+      <div class="step done"><span class="step-num">3</span> Select Target</div>
+      <div class="step done"><span class="step-num">4</span> Detect Problem</div>
+      <div class="step done"><span class="step-num">5</span> Train Models</div>
+      <div class="step done"><span class="step-num">6</span> Evaluate &amp; Compare</div>
+      <div class="step done"><span class="step-num">7</span> Predict &amp; Explain</div>
+    </div>
+    <div class="mt-32" style="text-align:center;">
+      <a href="{% url 'upload' %}" class="btn btn-primary btn-lg">Get Started →</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

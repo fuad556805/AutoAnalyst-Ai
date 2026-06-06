@@ -1,0 +1,132 @@
+🚀 REPLIT PROMPT (COPY PASTE)
+
+You are building a full-stack Django web application called AutoAnalyst AI, an AutoML platform that automatically analyzes datasets and trains machine learning models.
+
+🧠 PROJECT GOAL
+
+Create a Django-based AI Data Analysis platform where users can:
+
+Upload CSV/XLSX dataset
+View dataset preview
+Auto data profiling
+Select target column
+Automatically detect ML problem type (classification/regression)
+Train multiple ML models
+Evaluate models
+Select best model
+Make predictions
+Show explainable AI insights
+⚙️ TECH STACK
+Backend: Django
+Frontend: HTML, CSS, JavaScript
+ML: pandas, numpy, scikit-learn, joblib
+Database: SQLite (local) / PostgreSQL (optional)
+Deployment: Replit compatible
+📁 PROJECT STRUCTURE
+
+AutoAnalyst/
+│
+├── manage.py
+├── AutoAnalyst/
+│ ├── settings.py
+│ ├── urls.py
+│
+├── apps/
+│ ├── core/ (home, navbar)
+│ ├── dataset/ (upload, preview, profiling)
+│ ├── ml/ (training, preprocessing, evaluation)
+│ └── predict/ (prediction system)
+│
+├── templates/
+│ ├── base.html
+│ ├── upload.html
+│ ├── select_target.html
+│ ├── result.html
+│ └── predict.html
+│
+├── static/
+│ ├── css/style.css
+│ └── js/main.js
+│
+├── media/
+└── db.sqlite3
+
+🔁 WORKFLOW (STRICT ORDER)
+Upload dataset (CSV/XLSX)
+Preview dataset (rows, columns, types)
+Auto profiling (missing values, duplicates)
+Clean dataset (drop useless columns automatically)
+Suggest target column
+User selects target
+Detect problem type (classification/regression)
+Preprocess data (encoding, scaling, splitting)
+Feature selection
+Train multiple ML models
+Evaluate models
+Select best model
+Save model (joblib)
+Prediction system
+Explain results (feature importance)
+🎨 UI DESIGN (VERY IMPORTANT)
+STYLE:
+Black & White modern SaaS UI
+Clean minimal design
+Responsive (mobile, tablet, desktop)
+Font: Inter / Poppins
+🌐 NAVBAR DESIGN
+Logo: AutoAnalyst AI
+Links:
+Home
+Upload
+Target
+Results
+Predict
+Auth buttons:
+Login
+Sign Up
+Mobile hamburger menu required
+🔐 LOGIN / SIGNUP
+Simple authentication UI
+Clean black form card
+Input validation
+Django auth system
+📊 ML REQUIREMENTS
+
+Use scikit-learn:
+
+Classification:
+Logistic Regression
+Random Forest
+KNN
+SVM
+Regression:
+Linear Regression
+Random Forest Regressor
+Ridge Regression
+📈 OUTPUT REQUIREMENTS
+
+Show:
+
+Best model name
+Accuracy / R² score
+Feature importance
+Prediction result
+Simple explanation
+🚫 RULES
+Never skip workflow steps
+Always validate user input
+Always detect problem type first
+Always show clean UI
+Keep design minimal and professional
+No complex UI frameworks (pure HTML/CSS/JS only)
+⚡ FINAL RESULT
+
+User should experience:
+
+Upload dataset → AI analyzes → AI trains models → AI selects best model → AI predicts → AI explains result
+
+💡 BONUS (IF POSSIBLE)
+Step-by-step progress tracker (green light system)
+Dataset insights dashboard
+Download model button
+PDF report generator

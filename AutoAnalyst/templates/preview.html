@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load dict_filters %}
+{% block title %}Preview — {{ dataset_name }} — AutoAnalyst AI{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1>Dataset Preview</h1>
+    <p>{{ dataset_name }}</p>
+  </div>
+
+  <div class="progress-track">
+    <div class="progress-step done"><div class="progress-step-circle">✓</div><div class="progress-step-label">Upload</div></div>
+    <div class="progress-step active"><div class="progress-step-circle">2</div><div class="progress-step-label">Preview</div></div>
+    <div class="progress-step"><div class="progress-step-circle">3</div><div class="progress-step-label">Target</div></div>
+    <div class="progress-step"><div class="progress-step-circle">4</div><div class="progress-step-label">Train</div></div>
+    <div class="progress-step"><div class="progress-step-circle">5</div><div class="progress-step-label">Results</div></div>
+    <div class="progress-step"><div class="progress-step-circle">6</div><div class="progress-step-label">Predict</div></div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ rows }}</div>
+      <div class="stat-label">Rows</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ cols }}</div>
+      <div class="stat-label">Columns</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ duplicates }}</div>
+      <div class="stat-label">Duplicates</div>
+    </div>
+  </div>
+
+  <div class="card mb-24">
+    <div class="card-header flex justify-between items-center">
+      <div>
+        <div class="card-title">Column Profiling</div>
+        <div class="card-subtitle">Data types, missing values, and statistics per column</div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Type</th>
+            <th>Missing</th>
+            <th>Unique</th>
+            <th>Min</th>
+            <th>Max</th>
+            <th>Mean</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stat in col_stats %}
+          <tr>
+            <td><strong>{{ stat.name }}</strong></td>
+            <td><span class="badge badge-gray font-mono">{{ stat.dtype }}</span></td>
+            <td>
+              {% if stat.missing > 0 %}
+                <span class="badge badge-yellow">{{ stat.missing }} ({{ stat.missing_pct }}%)</span>
+              {% else %}
+                <span class="badge badge-green">0</span>
+              {% endif %}
+            </td>
+            <td>{{ stat.unique }}</td>
+            <td class="text-muted">{{ stat.min }}</td>
+            <td class="text-muted">{{ stat.max }}</td>
+            <td class="text-muted">{{ stat.mean }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mb-24">
+    <div class="card-header">
+      <div class="card-title">Data Preview (first 10 rows)</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            {% for col in columns %}<th>{{ col }}</th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in preview_rows %}
+          <tr>
+            {% for col in columns %}<td>{{ row|dict_get:col }}</td>{% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="flex gap-12 mb-32">
+    <a href="{% url 'upload' %}" class="btn btn-outline btn-md">← Re-upload</a>
+    <a href="{% url 'select_target' %}" class="btn btn-primary btn-md">Select Target Column →</a>
+  </div>
+</div>
+{% endblock %}
