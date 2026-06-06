@@ -126,7 +126,14 @@
               <td class="dash-muted">{{ ds.size_display }}</td>
               <td class="dash-muted">{{ ds.uploaded_at|date:"M d, Y" }}</td>
               <td>
-                <a href="{% url 'upload' %}" class="dash-action-link">Upload New</a>
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <a href="{% url 'load_dataset' ds.pk %}" class="dash-action-link">View Preview</a>
+                  <form method="post" action="{% url 'delete_dataset' ds.pk %}" style="margin:0;"
+                        onsubmit="return confirm('Delete {{ ds.name }}? This cannot be undone.');">
+                    {% csrf_token %}
+                    <button type="submit" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;color:#ef4444;font-weight:500;font-family:inherit;">Delete</button>
+                  </form>
+                </div>
               </td>
             </tr>
             {% endfor %}

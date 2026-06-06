@@ -1,5 +1,8 @@
-from django.shortcuts import render, redirect
+import os
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.contrib import messages
 from .models import Dataset, TrainingRun, Prediction
 
 
@@ -46,3 +49,24 @@ def dashboard(request):
         'recent_predictions': recent_predictions,
     }
     return render(request, 'dashboard.html', context)
+
+
+@login_required(login_url='/login/')
+def load_dataset(request, pk):
+    ds = get_object_or_404(Dataset, pk=pk, user=request.user)
+    if not ds.file_path or not os.path.exists(ds.file_path):
+        messages.error(request, 'Dataset file no longer exists on disk.')
+        return redirect('dashboard')
+    request.session['dataset_path']       = ds.file_path
+    request.session['dataset_name']       = ds.name
+    request.session['current_dataset_id'] = ds.pk
+    return redirect('preview')
+
+
+@login_required(login_url='/login/')
+@require_POST
+def delete_dataset(request, pk):
+    ds = get_object_or_404(Dataset, pk=pk, user=request.user)
+    ds.delete()
+    messages.success(request, f'Dataset "{ds.name}" deleted.')
+    return redirect('dashboard')
