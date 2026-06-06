@@ -70,23 +70,59 @@ def predict(request):
             target_lm  = label_mappings.get(target_col)
 
             if problem_type == 'classification':
-                if target_lm is not None:
+                # Resolve predicted label ──────────────────────────────────────
+                pred_label = str(pred)
+
+                # If no mapping stored for this target (numeric target column),
+                # build a semantic label on-the-fly from model.classes_ + column name
+                if target_lm is None:
                     try:
-                        pred_label = target_lm[int(pred)]
+                        raw_classes = list(model.classes_)
+                        int_classes = sorted([int(c) for c in raw_classes])
+                        col_name = target_col.replace('_', ' ').replace('-', ' ').strip().title()
+                        if int_classes == [0, 1]:
+                            built_lm = [f'Not {col_name}', col_name]
+                        else:
+                            built_lm = [f'Class {c}' for c in int_classes]
+                        # pred IS the class value for numeric targets
+                        pred_int = int(float(pred))
+                        idx = int_classes.index(pred_int)
+                        pred_label = built_lm[idx]
+                        target_lm  = built_lm   # also use for "possible outcomes"
                     except Exception:
-                        pred_label = str(pred)
-                else:
+                        try:
+                            fval = float(pred)
+                            pred_label = str(int(fval)) if fval == int(fval) else str(pred)
+                        except Exception:
+                            pred_label = str(pred)
+
+                if target_lm is not None and pred_label == str(pred):
+                    # String-encoded target: pred is a LabelEncoder index
                     try:
-                        fval = float(pred)
-                        pred_label = str(int(fval)) if fval == int(fval) else str(pred)
+                        raw_classes = list(model.classes_)
+                        class_idx = None
+                        for i, c in enumerate(raw_classes):
+                            try:
+                                if int(c) == int(pred):
+                                    class_idx = i
+                                    break
+                            except Exception:
+                                if str(c) == str(pred):
+                                    class_idx = i
+                                    break
+                        if class_idx is not None and class_idx < len(target_lm):
+                            pred_label = target_lm[class_idx]
+                        else:
+                            pred_label = target_lm[int(pred)]
                     except Exception:
                         pred_label = str(pred)
 
+                # Build "possible classes" display string ──────────────────────
                 try:
+                    raw_classes = list(model.classes_)
                     if target_lm is not None:
-                        all_classes = [str(c) for c in target_lm]
+                        all_classes = target_lm[:]
                     else:
-                        raw_classes = list(model.classes_)
                         all_classes = []
                         for c in raw_classes:
                             try:
@@ -100,11 +136,11 @@ def predict(request):
 
                 explanation = (
                     f'The model <strong>{best_model_name}</strong> analysed the '
-                    f'{len(feature_names)} input feature(s) and classified '
-                    f'<strong>{target_col}</strong> as <strong>"{pred_label}"</strong>. '
+                    f'{len(feature_names)} input feature(s) and predicted '
+                    f'<strong>{target_col}</strong> = <strong>"{pred_label}"</strong>. '
                 )
                 if classes_str:
-                    explanation += f'Possible classes: {classes_str}. '
+                    explanation += f'Possible outcomes: {classes_str}. '
                 explanation += f'Model {metric_label}: <strong>{best_score}%</strong>.'
 
                 prediction_result = {

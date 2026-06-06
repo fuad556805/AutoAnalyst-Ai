@@ -83,6 +83,25 @@ def train(request):
     metric_label     = output['metric_label']
     best_model       = best['model']
 
+    # ── Semantic labels for numeric target classes ──────────────────────────────
+    # When the target column is numeric (e.g. 0/1), LabelEncoder doesn't encode
+    # it, so label_mappings has no entry. Build a meaningful name from the column.
+    if problem_type == 'classification' and target not in label_mappings:
+        try:
+            classes = list(best_model.classes_)
+            int_classes = sorted([int(c) for c in classes])
+            col_name = target.replace('_', ' ').replace('-', ' ').strip().title()
+            if int_classes == [0, 1]:
+                # Binary 0/1: 0 → "Not <Column>", 1 → "<Column>"
+                label_mappings[target] = [f'Not {col_name}', col_name]
+            else:
+                # Multi-class numeric: label as "Class 0", "Class 1", …
+                label_mappings[target] = [
+                    f'Class {c}' for c in sorted(int_classes)
+                ]
+        except Exception:
+            pass
+
     insights = generate_insights(
         best=best,
         results=results,
