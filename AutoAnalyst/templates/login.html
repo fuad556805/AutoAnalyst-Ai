@@ -18,6 +18,7 @@
     <p class="auth-subtitle">Sign in to continue to your workspace.</p>
     <form method="post">
       {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
       <div class="form-group">
         <label for="id_username">Username</label>
         <input type="text" name="username" id="id_username" placeholder="Enter your username" autocomplete="username" required>
