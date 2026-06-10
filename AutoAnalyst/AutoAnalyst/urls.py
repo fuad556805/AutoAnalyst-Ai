@@ -15,4 +15,5 @@ urlpatterns = [
     path('dataset/', include('apps.dataset.urls')),
     path('ml/', include('apps.ml.urls')),
     path('predict/', include('apps.predict.urls')),
+    path('chat/',    include('apps.chat.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

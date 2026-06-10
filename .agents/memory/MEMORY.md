@@ -1,1 +1,2 @@
 - [Dashboard & module architecture](dashboard-architecture.md) — Dashboard app uses DB models (Dataset, TrainingRun, Prediction) for per-user history; views save records when user.is_authenticated.
+- [Chat app architecture](chat-architecture.md) — Gemini-powered chat in apps/chat/; requires GEMINI_API_KEY secret; chat_pdf redirects to existing report_pdf view.

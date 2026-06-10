@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'apps.dataset',
     'apps.ml',
     'apps.predict',
+    'apps.chat',
 ]
 
 MIDDLEWARE = [

@@ -36,6 +36,7 @@
     <li><a href="{% url 'visualize' %}" {% if request.resolver_match.url_name == 'visualize' %}class="active"{% endif %}>Visualize</a></li>
     <li><a href="{% url 'results' %}" {% if request.resolver_match.url_name == 'results' %}class="active"{% endif %}>Results</a></li>
     <li><a href="{% url 'predict' %}" {% if request.resolver_match.url_name == 'predict' %}class="active"{% endif %}>Predict</a></li>
+    <li><a href="{% url 'chat' %}" {% if request.resolver_match.url_name == 'chat' %}class="active"{% endif %}>Chat</a></li>
   </ul>
 
   <div class="nav-auth">
@@ -118,6 +119,12 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
     </span>
     Predict
+  </a>
+  <a href="{% url 'chat' %}" class="nav-mobile-link {% if request.resolver_match.url_name == 'chat' %}active{% endif %}">
+    <span class="nav-mobile-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </span>
+    Chat
   </a>
 
   <div class="nav-mobile-divider"></div>
