@@ -11,14 +11,4 @@ matplotlib==3.10.9
 reportlab==4.5.1
 openpyxl==3.1.5
 Pillow==12.2.0
-dj-database-url
-django
-gunicorn
-joblib
-matplotlib
-numpy
-openpyxl
-pandas
-reportlab
-scikit-learn
-whitenoise
+google-generativeai==0.8.5
