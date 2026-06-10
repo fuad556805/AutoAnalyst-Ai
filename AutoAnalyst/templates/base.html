@@ -7,7 +7,8 @@
   <title>{% block title %}AutoAnalyst AI{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block extra_css %}{% endblock %}
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2309090b'/><rect x='5' y='5' width='9' height='9' rx='2' fill='white'/><rect x='18' y='5' width='9' height='9' rx='2' fill='white' opacity='.5'/><rect x='5' y='18' width='9' height='9' rx='2' fill='white' opacity='.5'/><rect x='18' y='18' width='9' height='9' rx='2' fill='white'/></svg>">
 </head>
 <body>

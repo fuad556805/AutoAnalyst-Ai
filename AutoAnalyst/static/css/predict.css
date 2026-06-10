@@ -1,0 +1,221 @@
+/* ── MODEL INFO BANNER ───────────────────────────── */
+.model-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  flex-wrap: wrap;
+}
+.mib-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 20px;
+  flex: 1;
+  min-width: 110px;
+}
+.mib-divider {
+  width: 1px;
+  background: var(--border);
+  align-self: stretch;
+}
+.mib-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.mib-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--black);
+}
+.mib-score { color: var(--success); font-size: 16px; font-weight: 800; }
+
+/* ── PREDICTION RESULT CARD ──────────────────────── */
+.pred-result-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1.5px solid var(--black);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.pred-result-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--black);
+  padding: 28px 32px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.pred-result-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.pred-result-icon {
+  width: 52px;
+  height: 52px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+.pred-result-icon svg { width: 24px; height: 24px; }
+.pred-result-text { display: flex; flex-direction: column; gap: 4px; }
+.pred-result-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.pred-result-value {
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: -1px;
+  line-height: 1.1;
+  word-break: break-all;
+}
+.pred-result-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  min-width: 140px;
+}
+.pred-confidence-label {
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.pred-confidence-score {
+  font-size: 26px;
+  font-weight: 800;
+  color: #4ade80;
+  letter-spacing: -0.5px;
+}
+.pred-confidence-bar {
+  width: 140px;
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.pred-confidence-fill {
+  height: 100%;
+  background: #4ade80;
+  border-radius: 100px;
+  transition: width 1s cubic-bezier(0.16,1,0.3,1);
+}
+.pred-confidence-sub {
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* ── EXPLANATION ─────────────────────────────────── */
+.pred-explanation {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--bg-subtle);
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+}
+.pred-explanation-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--blue);
+}
+.pred-explanation-icon svg { width: 14px; height: 14px; }
+.pred-explanation-text {
+  font-size: 13.5px;
+  color: var(--text-2);
+  line-height: 1.65;
+  padding-top: 3px;
+}
+
+/* ── INPUT SUMMARY ───────────────────────────────── */
+.pred-input-summary {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+}
+.pred-input-summary-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 12px;
+}
+.pred-input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+.pred-input-item {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+}
+.pred-input-feat {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pred-input-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--black);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── PREDICT FORM ────────────────────────────────── */
+.predict-form-group label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 768px) {
+  .pred-result-card { padding: 20px 18px; }
+  .pred-result-value { font-size: 28px; }
+  .pred-result-right { align-items: flex-start; }
+  .mib-item { padding: 10px 14px; }
+}

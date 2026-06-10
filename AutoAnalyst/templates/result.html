@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/result.css' %}">{% endblock %}
 {% block title %}Results — AutoAnalyst AI{% endblock %}
 {% block content %}
 
@@ -327,115 +329,6 @@
   </div>
 </div>
 
-<style>
-.best-banner {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 24px;
-  background: var(--black);
-  border-radius: var(--radius-lg);
-  padding: 24px 28px;
-  position: relative;
-  overflow: hidden;
-}
-.best-banner::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 0% 50%, rgba(255,255,255,0.05) 0%, transparent 60%);
-}
-.best-eyebrow { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; color: rgba(255,255,255,0.45); margin-bottom: 8px; position: relative; }
-.best-name { font-size: 20px; font-weight: 700; color: white; letter-spacing: -0.4px; position: relative; }
-.best-meta { font-size: 13px; color: rgba(255,255,255,0.5); position: relative; }
-.best-score { font-size: 42px; font-weight: 800; color: #4ade80; letter-spacing: -2px; line-height: 1; position: relative; }
-
-/* Pipeline steps */
-.pipeline-steps-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-.psc-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--bg-subtle); }
-.pipeline-steps { padding: 8px 0; }
-.pstep { display: flex; align-items: flex-start; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
-.pstep:last-child { border-bottom: none; }
-.pstep:hover { background: var(--bg-subtle); }
-.pstep-num { width: 26px; height: 26px; background: var(--black); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-.pstep-body { flex: 1; }
-.pstep-title { font-size: 13.5px; font-weight: 700; color: var(--black); margin-bottom: 4px; }
-.pstep-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
-.pstep-badge { flex-shrink: 0; }
-.pstep-desc code { background: var(--bg-muted); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 11.5px; color: var(--text-2); font-family: monospace; }
-
-/* Encoding tags */
-.encoding-tags { display: flex; flex-direction: column; gap: 4px; }
-.enc-tag { font-size: 12px; color: var(--text-2); }
-.enc-val { background: var(--bg-muted); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 11px; font-family: monospace; margin-right: 4px; }
-
-/* Split bar */
-.split-bar { display: flex; border-radius: 100px; overflow: hidden; height: 20px; font-size: 11px; font-weight: 600; }
-.split-train { background: var(--black); color: white; display: flex; align-items: center; justify-content: center; padding: 0 8px; }
-.split-test  { background: var(--bg-muted); color: var(--muted); display: flex; align-items: center; justify-content: center; padding: 0 8px; border: 1px solid var(--border); }
-
-/* Metrics */
-.metrics-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
-.metric-box { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px; min-width: 110px; }
-.metric-box.highlight { background: var(--black); border-color: var(--black); }
-.metric-box.highlight .metric-val { color: #4ade80; }
-.metric-box.highlight .metric-lbl { color: rgba(255,255,255,0.5); }
-.metric-val { font-size: 24px; font-weight: 800; color: var(--black); letter-spacing: -0.8px; }
-.metric-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; color: var(--muted2); margin-top: 3px; }
-
-/* Insights */
-.insights-list { display: flex; flex-direction: column; gap: 10px; }
-.insight-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--bg-subtle); border-radius: var(--radius); }
-.insight-dot { width: 7px; height: 7px; background: var(--black); border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
-.insight-text { font-size: 13.5px; color: var(--text-2); line-height: 1.6; }
-
-/* Score bar best */
-.score-bar-fill.best { background: var(--success) !important; }
-
-/* Copy chart button */
-.copy-chart-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: inherit;
-}
-.copy-chart-btn:hover { background: var(--black); color: white; border-color: var(--black); }
-.chart-overlay-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid var(--border);
-  z-index: 2;
-}
-.chart-overlay-btn:hover { background: var(--black); color: white; }
-.copy-toast {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--black);
-  color: white;
-  padding: 10px 22px;
-  border-radius: 100px;
-  font-size: 13px;
-  font-weight: 600;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.25s;
-  z-index: 9999;
-}
-.copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-</style>
 
 <div id="copy-toast" class="copy-toast">✓ Chart copied to clipboard</div>
 

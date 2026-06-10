@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/home.css' %}">{% endblock %}
 {% block title %}AutoAnalyst AI — Transform Raw Data into AI Predictions{% endblock %}
 {% block content %}
 
@@ -148,64 +150,5 @@
   </div>
 </section>
 
-<style>
-.contact-section {
-  background: #09090b;
-  padding: 72px 0 80px;
-  margin-top: 0;
-}
-.contact-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 48px;
-  flex-wrap: wrap;
-}
-.contact-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 14px;
-  padding: 20px 28px;
-  min-width: 280px;
-  transition: background 0.2s;
-}
-.contact-card:hover { background: rgba(255,255,255,0.09); }
-.contact-icon {
-  width: 46px;
-  height: 46px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
-}
-.contact-label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 4px;
-}
-.contact-email {
-  font-size: 15px;
-  font-weight: 600;
-  color: white;
-  text-decoration: none;
-  letter-spacing: -0.2px;
-  transition: color 0.15s;
-}
-.contact-email:hover { color: rgba(255,255,255,0.7); }
-
-@media (max-width: 640px) {
-  .contact-inner { flex-direction: column; align-items: flex-start; }
-  .contact-card { width: 100%; }
-}
-</style>
 
 {% endblock %}
