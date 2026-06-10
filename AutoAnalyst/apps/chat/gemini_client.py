@@ -209,34 +209,52 @@ def generate_chart(df, chart_type, col1, col2=None):
 
 
 def chat_with_gemini(user_message, system_prompt, history):
+    import time
+    import google.generativeai as genai
+
     api_key = os.environ.get('GEMINI_API_KEY', '').strip()
     if not api_key:
         return None, (
             '⚠️ **Gemini API key not set.**\n\n'
             'To enable AI chat:\n'
             '1. Get a free key at [aistudio.google.com](https://aistudio.google.com/app/apikey)\n'
-            '2. Open the Replit Secrets panel (🔒 icon)\n'
-            '3. Add a secret named `GEMINI_API_KEY` with your key\n'
-            '4. Restart the server'
+            '2. Add it as `GEMINI_API_KEY` in your environment secrets\n'
+            '3. Restart the server'
         )
-    try:
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(
-            model_name='gemini-2.0-flash',
-            system_instruction=system_prompt,
-        )
-        gemini_history = []
-        for msg in history[-20:]:
-            role = 'user' if msg['role'] == 'user' else 'model'
-            gemini_history.append({'role': role, 'parts': [msg['content']]})
-        chat = model.start_chat(history=gemini_history)
-        response = chat.send_message(user_message)
-        return response.text, None
-    except Exception as e:
-        err = str(e)
-        if 'api_key' in err.lower() or 'api key' in err.lower() or 'invalid' in err.lower():
-            return None, '⚠️ Invalid Gemini API key. Please check your `GEMINI_API_KEY` secret.'
-        if 'quota' in err.lower() or '429' in err:
-            return None, '⚠️ Gemini API rate limit reached. Please wait a moment and try again.'
-        return None, f'⚠️ Gemini error: {err}'
+
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel(
+        model_name='gemini-2.0-flash',
+        system_instruction=system_prompt,
+    )
+    gemini_history = []
+    for msg in history[-20:]:
+        role = 'user' if msg['role'] == 'user' else 'model'
+        gemini_history.append({'role': role, 'parts': [msg['content']]})
+
+    delays = [5, 15, 30]
+    last_err = ''
+    for attempt, wait in enumerate([0] + delays):
+        if wait:
+            time.sleep(wait)
+        try:
+            chat = model.start_chat(history=gemini_history)
+            response = chat.send_message(user_message)
+            return response.text, None
+        except Exception as e:
+            last_err = str(e)
+            is_rate_limit = ('429' in last_err or 'quota' in last_err.lower()
+                             or 'resource_exhausted' in last_err.lower()
+                             or 'rate' in last_err.lower())
+            is_invalid_key = ('api_key' in last_err.lower() or 'api key' in last_err.lower()
+                              or 'invalid' in last_err.lower() or '400' in last_err)
+            if is_invalid_key:
+                return None, '⚠️ Invalid Gemini API key. Please check your `GEMINI_API_KEY` secret.'
+            if not is_rate_limit:
+                return None, f'⚠️ Gemini error: {last_err}'
+
+    return None, (
+        '⚠️ Gemini is currently busy (rate limit). '
+        'Your free API key allows ~15 requests/minute. '
+        'Please wait 60 seconds and try again.'
+    )
