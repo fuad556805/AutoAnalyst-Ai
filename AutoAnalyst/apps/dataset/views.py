@@ -1,4 +1,5 @@
 import os
+import shutil
 import pandas as pd
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -34,10 +35,14 @@ def upload(request):
             messages.error(request, f'Could not read file: {e}')
             return redirect('upload')
 
+        old_model_dir = request.session.get('model_dir')
+        if old_model_dir and os.path.exists(old_model_dir):
+            shutil.rmtree(old_model_dir, ignore_errors=True)
+
         for key in ['target_column', 'ml_results', 'best_model_name', 'problem_type',
                     'feature_importance', 'feature_names', 'label_mappings',
                     'ml_charts', 'ml_extra_metrics', 'ml_insights', 'ml_preprocessing',
-                    'current_dataset_id']:
+                    'current_dataset_id', 'model_dir']:
             request.session.pop(key, None)
 
         request.session['dataset_path'] = save_path
@@ -84,10 +89,14 @@ def delete_dataset(request):
             from apps.dashboard.models import Dataset as DatasetRecord
             DatasetRecord.objects.filter(pk=dataset_id, user=request.user).delete()
 
+    old_model_dir = request.session.get('model_dir')
+    if old_model_dir and os.path.exists(old_model_dir):
+        shutil.rmtree(old_model_dir, ignore_errors=True)
+
     for key in ['dataset_path', 'dataset_name', 'target_column', 'ml_results',
                 'best_model_name', 'problem_type', 'feature_importance', 'feature_names',
                 'label_mappings', 'ml_charts', 'ml_extra_metrics', 'ml_insights',
-                'ml_preprocessing', 'ml_metric_label', 'current_dataset_id']:
+                'ml_preprocessing', 'ml_metric_label', 'current_dataset_id', 'model_dir']:
         request.session.pop(key, None)
 
     messages.success(request, 'Dataset deleted. You can upload a new file.')

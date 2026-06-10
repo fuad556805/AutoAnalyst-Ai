@@ -14,8 +14,13 @@ import joblib
 # ── Predict ────────────────────────────────────────────────────────────────────
 
 def predict(request):
-    meta_path  = os.path.join(settings.SAVED_MODELS_DIR, 'metadata.json')
-    model_path = os.path.join(settings.SAVED_MODELS_DIR, 'best_model.joblib')
+    model_dir = request.session.get('model_dir')
+    if not model_dir:
+        messages.error(request, 'No trained model found. Please train a model first.')
+        return redirect('upload')
+
+    meta_path  = os.path.join(model_dir, 'metadata.json')
+    model_path = os.path.join(model_dir, 'best_model.joblib')
 
     if not os.path.exists(meta_path) or not os.path.exists(model_path):
         messages.error(request, 'No trained model found. Please train a model first.')
@@ -222,7 +227,10 @@ def _save_prediction(request, model_name: str, target_col: str,
 # ── Download Model ─────────────────────────────────────────────────────────────
 
 def download_model(request):
-    model_path = os.path.join(settings.SAVED_MODELS_DIR, 'best_model.joblib')
+    model_dir = request.session.get('model_dir')
+    if not model_dir:
+        raise Http404('Model not found')
+    model_path = os.path.join(model_dir, 'best_model.joblib')
     if not os.path.exists(model_path):
         raise Http404('Model not found')
     return FileResponse(open(model_path, 'rb'), as_attachment=True,
@@ -232,7 +240,11 @@ def download_model(request):
 # ── Download Notebook ──────────────────────────────────────────────────────────
 
 def download_notebook(request):
-    meta_path = os.path.join(settings.SAVED_MODELS_DIR, 'metadata.json')
+    model_dir = request.session.get('model_dir')
+    if not model_dir:
+        messages.error(request, 'No trained model found. Train a model first.')
+        return redirect('upload')
+    meta_path = os.path.join(model_dir, 'metadata.json')
     if not os.path.exists(meta_path):
         messages.error(request, 'No trained model found. Train a model first.')
         return redirect('predict')

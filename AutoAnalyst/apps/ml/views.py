@@ -114,10 +114,14 @@ def train(request):
         metric_label=metric_label,
     )
 
-    # ── Persist model + metadata ───────────────────────────────────────────────
-    os.makedirs(settings.SAVED_MODELS_DIR, exist_ok=True)
-    model_path = os.path.join(settings.SAVED_MODELS_DIR, 'best_model.joblib')
-    meta_path  = os.path.join(settings.SAVED_MODELS_DIR, 'metadata.json')
+    # ── Persist model + metadata (session-scoped to prevent cross-user leakage) ──
+    if not request.session.session_key:
+        request.session.save()
+    session_key = request.session.session_key
+    model_dir   = os.path.join(settings.SAVED_MODELS_DIR, session_key)
+    os.makedirs(model_dir, exist_ok=True)
+    model_path = os.path.join(model_dir, 'best_model.joblib')
+    meta_path  = os.path.join(model_dir, 'metadata.json')
 
     if best_model is not None:
         joblib.dump({
@@ -188,6 +192,7 @@ def train(request):
         training_run_id = run.pk
 
     # ── Session ────────────────────────────────────────────────────────────────
+    request.session['model_dir']           = model_dir
     request.session['ml_results']          = session_results
     request.session['ml_metric_label']     = metric_label
     request.session['best_model_name']     = best['name']
@@ -233,7 +238,11 @@ def results(request):
 # ── PDF Report ─────────────────────────────────────────────────────────────────
 
 def report_pdf(request):
-    meta_path = os.path.join(settings.SAVED_MODELS_DIR, 'metadata.json')
+    model_dir = request.session.get('model_dir')
+    if not model_dir:
+        messages.error(request, 'No trained model found. Please train a model first.')
+        return redirect('upload')
+    meta_path = os.path.join(model_dir, 'metadata.json')
     if not os.path.exists(meta_path):
         messages.error(request, 'No trained model found. Train a model first.')
         return redirect('results')
