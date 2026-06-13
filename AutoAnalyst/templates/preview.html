@@ -113,7 +113,15 @@
     <div class="card mb-20">
       <div class="card-header">
         <div><div class="card-title">Data Preview</div><div class="card-subtitle">First 10 rows of {{ dataset_name }}</div></div>
-        <span class="badge badge-gray">10 of {{ rows }} rows</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="badge badge-gray">10 of {{ rows }} rows</span>
+          {% if cols > 8 %}
+          <span class="scroll-hint-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            Scroll to see all {{ cols }} columns
+          </span>
+          {% endif %}
+        </div>
       </div>
       <div class="table-wrap">
         <table>
@@ -135,7 +143,7 @@
         <div><div class="card-title">Column Profiling</div><div class="card-subtitle">Data types, missing values, and statistics per column</div></div>
         <span class="badge badge-gray">{{ cols }} columns</span>
       </div>
-      <div class="table-wrap">
+      <div class="table-wrap" style="overflow-x:auto;">
         <table>
           <thead>
             <tr><th>Column</th><th>Type</th><th>Missing</th><th>Unique</th><th>Min</th><th>Max</th><th>Mean / Top</th></tr>
