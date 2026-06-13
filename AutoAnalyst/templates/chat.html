@@ -184,6 +184,8 @@
 
 <div id="copy-toast" class="copy-toast">✓ Copied to clipboard</div>
 
+{% endblock %}
+
 {% block extra_js %}
 <script>
 const SEND_URL  = "{% url 'chat_send' %}";
@@ -437,5 +439,4 @@ document.querySelectorAll('.msg-row.msg-ai .msg-bubble').forEach(el => {
 scrollBottom();
 $input.focus();
 </script>
-{% endblock %}
 {% endblock %}
