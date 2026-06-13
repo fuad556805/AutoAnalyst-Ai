@@ -15,8 +15,9 @@ def terms(request):
 
 @login_required
 def profile(request):
+    from apps.core.models import Profile
     user = request.user
-    profile = user.profile
+    profile, _ = Profile.objects.get_or_create(user=user)
 
     if request.method == 'POST':
         first_name = request.POST.get('first_name', '').strip()
