@@ -223,6 +223,7 @@
 {% block content %}{% endblock %}
 
 <footer>
+<div class="footer-left">
   <div class="footer-brand">
     <div class="f-icon">
       <svg viewBox="0 0 16 16" fill="none">
@@ -234,8 +235,22 @@
     </div>
     <span>AutoAnalyst AI</span>
   </div>
-  <span>© 2026 AutoAnalyst AI. Transform raw data into predictions.</span>
+  <p class="footer-tagline">Transform raw data into AI predictions.</p>
+</div>
+
+<div class="footer-links">
+  <span class="footer-links-label">Platform</span>
+  <a href="{% url 'home' %}">Home</a>
+  <a href="{% url 'upload' %}">Upload Dataset</a>
+  <a href="{% url 'results' %}">Results</a>
+  <a href="{% url 'chat' %}">AI Chat</a>
+</div>
+
+<div class="footer-right">
   {% block footer_extra %}{% endblock %}
+  <span class="footer-copy">© 2026 AutoAnalyst AI</span>
+</div>
+
 </footer>
 
 {% if request.resolver_match.url_name != 'chat' %}
