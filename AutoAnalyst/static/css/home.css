@@ -168,56 +168,63 @@
 /* ── CONTACT SECTION ─────────────────────────────── */
 .contact-section {
   background: #09090b;
-  padding: 72px 0 80px;
-  margin-top: 0;
+  padding: 80px 0 88px;
 }
-.contact-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 48px;
-  flex-wrap: wrap;
+.contact-header {
+  text-align: center;
+  margin-bottom: 48px;
 }
-.contact-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 14px;
-  padding: 20px 28px;
-  min-width: 280px;
-  transition: background 0.2s;
-}
-.contact-card:hover { background: rgba(255,255,255,0.09); }
-.contact-icon {
-  width: 46px;
-  height: 46px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.contact-heading {
   color: white;
-  flex-shrink: 0;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  margin: 12px 0 14px;
 }
-.contact-label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 4px;
-}
-.contact-email {
+.contact-subheading {
+  color: rgba(255,255,255,0.55);
   font-size: 15px;
-  font-weight: 600;
-  color: white;
-  text-decoration: none;
-  letter-spacing: -0.2px;
-  transition: color 0.15s;
+  line-height: 1.65;
 }
-.contact-email:hover { color: rgba(255,255,255,0.7); }
+.contact-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.contact-card-pro {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 16px;
+  padding: 24px 24px;
+  text-decoration: none;
+  transition: background .2s, border-color .2s;
+}
+.contact-card-pro:not(.contact-card-static):hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.18);
+}
+.ccp-icon {
+  width: 50px; height: 50px; flex-shrink: 0;
+  background: rgba(255,255,255,0.07);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.8);
+}
+.ccp-body { flex: 1; min-width: 0; }
+.ccp-label {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: rgba(255,255,255,0.35); margin-bottom: 5px;
+}
+.ccp-value {
+  font-size: 14px; font-weight: 600; color: #fff;
+  letter-spacing: -0.1px; margin-bottom: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ccp-note { font-size: 12px; color: rgba(255,255,255,0.35); }
+.ccp-arrow { color: rgba(255,255,255,0.35); flex-shrink: 0; }
 
 /* ── TEAM SECTION ────────────────────────────────── */
 .team-section {
@@ -305,49 +312,6 @@
 .privacy-item-title { font-size: 13.5px; font-weight: 700; color: #fff; margin-bottom: 5px; letter-spacing: -0.1px; }
 .privacy-item-text { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.65; }
 
-/* ── CONTACT SECTION (redesigned) ───────────────── */
-.contact-section {
-  background: #09090b;
-  padding: 72px 0 80px;
-}
-.contact-top { text-align: center; margin-bottom: 40px; }
-.contact-heading { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.7px; margin-top: 10px; margin-bottom: 10px; }
-.contact-sub { font-size: 15px; color: rgba(255,255,255,0.5); max-width: 400px; margin: 0 auto; line-height: 1.6; }
-.contact-cards-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-.contact-card-v2 {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 14px;
-  padding: 20px 22px;
-  text-decoration: none;
-  transition: background .2s, border-color .2s;
-  position: relative;
-}
-.contact-card-v2:not(.contact-card-static):hover {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.18);
-}
-.contact-card-icon {
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255,255,255,0.8);
-}
-.contact-card-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.35); margin-bottom: 4px; }
-.contact-card-value { font-size: 14px; font-weight: 600; color: #fff; letter-spacing: -0.1px; }
-.contact-card-arrow { color: rgba(255,255,255,0.4); margin-left: auto; flex-shrink: 0; }
 
 /* ── RESPONSIVE ──────────────────────────────────── */
 @media (max-width: 900px) {
@@ -362,8 +326,7 @@
   .hero h1 { font-size: clamp(1.8rem, 8vw, 2.8rem); }
   .features-grid { grid-template-columns: 1fr; }
   .cta-section { padding: 36px 24px; }
-  .contact-inner { flex-direction: column; align-items: flex-start; }
-  .contact-card { width: 100%; }
+  .contact-cards-grid { grid-template-columns: 1fr; }
   .team-card { flex-direction: column; align-items: flex-start; }
   .privacy-grid { grid-template-columns: 1fr; }
   .contact-cards-row { grid-template-columns: 1fr; }

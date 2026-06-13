@@ -6,6 +6,12 @@ from django.contrib import messages
 def home(request):
     return render(request, 'home.html')
 
+def privacy(request):
+    return render(request, 'privacy.html')
+
+def terms(request):
+    return render(request, 'terms.html')
+
 def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
