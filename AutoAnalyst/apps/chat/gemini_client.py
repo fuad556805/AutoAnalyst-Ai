@@ -62,7 +62,8 @@ def build_system_prompt(dataset_context, dataset_name='dataset', ml_context=None
         '- Use bullet points and numbered lists for clarity.\n'
         '- For code/SQL, always use ```python or ```sql fenced blocks.\n'
         '- Never invent column names or statistics — only reference what you can see.\n'
-        '- If you are unsure, say so.'
+        '- If you are unsure, say so.\n'
+        '- Always respond in the same language the user writes in. If the user writes in Bengali/Bangla, reply fully in Bengali.'
     )
     if dataset_context:
         prompt += f'\n\nThe user has uploaded "{dataset_name}":\n\n{dataset_context}'
