@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}My Profile — AutoAnalyst AI{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <div class="container">
+
+    <div class="profile-header">
+      <div class="section-tag">Account</div>
+      <h1>My Profile</h1>
+      <p class="profile-subtitle">Manage your personal information and profile picture.</p>
+    </div>
+
+    {% if messages %}
+      {% for msg in messages %}
+        <div class="alert alert-{{ msg.tags }}" style="margin-bottom:20px;">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="profile-grid">
+
+      <!-- Avatar Card -->
+      <div class="profile-avatar-card">
+        <div class="avatar-wrap" id="avatarWrap">
+          {% if profile.image %}
+            <img src="{{ profile.image.url }}" alt="Profile" class="avatar-img" id="avatarImg">
+          {% else %}
+            <div class="avatar-initials" id="avatarInitials">{{ profile.get_avatar_letter }}</div>
+          {% endif %}
+          <label for="imageInput" class="avatar-overlay">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <span>Change Photo</span>
+          </label>
+        </div>
+        <p class="avatar-username">@{{ profile.user.username }}</p>
+        <p class="avatar-hint">JPG, PNG or GIF · Max 5MB</p>
+      </div>
+
+      <!-- Info Form -->
+      <div class="profile-form-card">
+        <form method="post" enctype="multipart/form-data" id="profileForm">
+          {% csrf_token %}
+          <input type="file" name="image" id="imageInput" accept="image/*" style="display:none" onchange="previewImage(this)">
+
+          <div class="profile-form-section">
+            <h3>Personal Information</h3>
+            <div class="profile-field-row">
+              <div class="profile-field">
+                <label>First Name</label>
+                <input type="text" name="first_name" value="{{ profile.user.first_name }}" placeholder="Enter first name">
+              </div>
+              <div class="profile-field">
+                <label>Last Name</label>
+                <input type="text" name="last_name" value="{{ profile.user.last_name }}" placeholder="Enter last name">
+              </div>
+            </div>
+            <div class="profile-field">
+              <label>Email Address</label>
+              <input type="email" name="email" value="{{ profile.user.email }}" placeholder="Enter email address">
+            </div>
+            <div class="profile-field">
+              <label>Short Bio <span style="color:var(--muted2);font-weight:400;">(optional)</span></label>
+              <input type="text" name="bio" value="{{ profile.bio }}" placeholder="e.g. Data scientist · ML enthusiast" maxlength="160">
+            </div>
+          </div>
+
+          <div class="profile-form-section">
+            <h3>Account Info</h3>
+            <div class="profile-field">
+              <label>Username</label>
+              <input type="text" value="{{ profile.user.username }}" disabled class="input-disabled">
+              <p class="field-hint">Username cannot be changed.</p>
+            </div>
+            <div class="profile-field">
+              <label>Member Since</label>
+              <input type="text" value="{{ profile.user.date_joined|date:'F j, Y' }}" disabled class="input-disabled">
+            </div>
+          </div>
+
+          <div class="profile-actions">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline">Go to Dashboard</a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const wrap = document.getElementById('avatarWrap');
+      let img = document.getElementById('avatarImg');
+      const initials = document.getElementById('avatarInitials');
+      if (!img) {
+        img = document.createElement('img');
+        img.id = 'avatarImg';
+        img.className = 'avatar-img';
+        wrap.insertBefore(img, wrap.firstChild);
+      }
+      if (initials) initials.style.display = 'none';
+      img.src = e.target.result;
+      img.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+{% endblock %}

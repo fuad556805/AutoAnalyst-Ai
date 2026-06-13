@@ -13,6 +13,7 @@ urlpatterns = [
     path('signup/', core_views.signup, name='signup'),
     path('privacy/', core_views.privacy, name='privacy'),
     path('terms/', core_views.terms, name='terms'),
+    path('profile/', core_views.profile, name='profile'),
     path('dashboard/', include('apps.dashboard.urls')),
     path('dataset/', include('apps.dataset.urls')),
     path('ml/', include('apps.ml.urls')),

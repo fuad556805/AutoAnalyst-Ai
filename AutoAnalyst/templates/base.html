@@ -92,7 +92,10 @@
 
   <div class="nav-auth">
     {% if user.is_authenticated %}
-      <a href="{% url 'dashboard' %}" class="btn btn-outline btn-sm">{{ user.username }}</a>
+      <a href="{% url 'profile' %}" class="nav-user-btn">
+        <div class="nav-user-avatar">{{ user.username|slice:":1"|upper }}</div>
+        <span>{{ user.username }}</span>
+      </a>
       <form method="post" action="{% url 'logout' %}" style="display:inline">
         {% csrf_token %}
         <button type="submit" class="btn btn-outline btn-sm">Sign Out</button>
@@ -181,10 +184,13 @@
   <div class="nav-mobile-divider"></div>
   <div class="nav-mobile-section-label">Account</div>
   {% if user.is_authenticated %}
-    <div class="nav-mobile-user">
+    <a href="{% url 'profile' %}" class="nav-mobile-user">
       <div class="nav-mobile-user-avatar">{{ user.username|slice:":1"|upper }}</div>
-      <span class="nav-mobile-user-name">{{ user.username }}</span>
-    </div>
+      <div>
+        <span class="nav-mobile-user-name">{{ user.username }}</span>
+        <span class="nav-mobile-user-sub">View Profile →</span>
+      </div>
+    </a>
     <form method="post" action="{% url 'logout' %}">
       {% csrf_token %}
       <button type="submit" class="nav-mobile-link nav-mobile-link-danger" style="width:100%;background:none;border:none;cursor:pointer;text-align:left;">

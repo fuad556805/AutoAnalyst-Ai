@@ -818,6 +818,85 @@ footer {
 
 .footer-copy { font-size: 11.5px; color: var(--muted2); margin: 0; }
 
+/* ── NAV USER BUTTON ─────────────────────────────── */
+.nav-user-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  text-decoration: none; border: 1px solid var(--border);
+  border-radius: 8px; padding: 5px 10px 5px 6px;
+  background: var(--white); transition: background .15s, border-color .15s;
+  font-size: 13px; font-weight: 600; color: var(--black);
+}
+.nav-user-btn:hover { background: var(--bg-subtle); border-color: var(--border-strong); }
+.nav-user-avatar {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: var(--black); color: white;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.nav-mobile-user { display: flex; align-items: center; gap: 12px; padding: 12px 20px; text-decoration: none; }
+.nav-mobile-user-sub { display: block; font-size: 11px; color: var(--muted2); margin-top: 1px; }
+
+/* ── PROFILE PAGE ─────────────────────────────────── */
+.profile-page { padding: 56px 0 96px; min-height: 60vh; }
+.profile-header { margin-bottom: 40px; }
+.profile-header h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.7px; color: var(--black); margin: 10px 0 6px; }
+.profile-subtitle { font-size: 14px; color: var(--muted2); }
+.profile-grid { display: grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: start; }
+
+.profile-avatar-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 16px; padding: 32px 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  text-align: center;
+}
+.avatar-wrap {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: var(--black); position: relative;
+  overflow: hidden; cursor: pointer; flex-shrink: 0;
+}
+.avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-initials {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; font-weight: 800; color: white;
+}
+.avatar-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; color: white; font-size: 11px; font-weight: 600;
+  opacity: 0; transition: opacity .2s; cursor: pointer;
+}
+.avatar-wrap:hover .avatar-overlay { opacity: 1; }
+.avatar-username { font-size: 14px; font-weight: 700; color: var(--black); margin: 0; }
+.avatar-hint { font-size: 11.5px; color: var(--muted2); margin: 0; }
+
+.profile-form-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 16px; padding: 32px;
+}
+.profile-form-section { margin-bottom: 32px; }
+.profile-form-section h3 {
+  font-size: 13px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.7px; color: var(--muted2);
+  margin-bottom: 18px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.profile-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.profile-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.profile-field label { font-size: 13px; font-weight: 600; color: var(--black); }
+.profile-field input {
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 9px 12px; font-size: 14px; color: var(--black);
+  background: var(--white); transition: border-color .15s;
+  font-family: inherit; outline: none;
+}
+.profile-field input:focus { border-color: var(--black); }
+.input-disabled { background: var(--bg-subtle) !important; color: var(--muted2) !important; cursor: not-allowed; }
+.field-hint { font-size: 11.5px; color: var(--muted2); margin: 2px 0 0; }
+.profile-actions { display: flex; gap: 12px; padding-top: 8px; }
+
 /* ── LEGAL PAGES ─────────────────────────────────── */
 .legal-page { padding: 64px 0 96px; min-height: 60vh; }
 .legal-header { margin-bottom: 48px; }
@@ -848,5 +927,7 @@ footer {
   .predict-grid { grid-template-columns: 1fr; }
   footer { padding: 24px 20px; flex-direction: column; align-items: flex-start; gap: 20px; }
   .footer-right { align-items: flex-start; }
+  .profile-grid { grid-template-columns: 1fr; }
+  .profile-field-row { grid-template-columns: 1fr; }
   .auth-card { padding: 28px 20px; }
 }
