@@ -3,12 +3,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   background: var(--success-bg);
   border: 1px solid var(--success-border);
   border-radius: var(--radius-lg);
   padding: 14px 18px;
-  gap: 16px;
+  gap: 12px;
 }
+
 .cdb-left { display: flex; align-items: center; gap: 12px; }
 .cdb-icon {
   width: 38px;
@@ -25,3 +27,9 @@
 .cdb-name { font-size: 14px; font-weight: 700; color: var(--black); }
 .cdb-sub  { font-size: 12px; color: var(--success); font-weight: 500; margin-top: 2px; }
 .cdb-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 600px) {
+  .current-dataset-banner { padding: 12px 14px; }
+  .cdb-actions { flex-wrap: wrap; width: 100%; }
+}

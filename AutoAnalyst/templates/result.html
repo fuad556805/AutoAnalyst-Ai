@@ -163,7 +163,7 @@
     {% endif %}
 
     <!-- ── MODEL COMPARISON + FEATURE IMPORTANCE ──── -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+    <div class="results-two-col">
 
       <div class="card">
         <div class="card-header">
@@ -246,8 +246,8 @@
       {% if charts.confusion %}
       <div class="mt-16">
         <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Confusion Matrix</div>
-        <div style="position:relative;display:inline-block;">
-          <img src="data:image/png;base64,{{ charts.confusion }}" alt="Confusion Matrix" style="max-width:340px;border-radius:var(--radius);display:block;">
+        <div class="chart-responsive-wrap">
+          <img src="data:image/png;base64,{{ charts.confusion }}" alt="Confusion Matrix" class="chart-responsive" style="max-width:340px;border-radius:var(--radius);display:block;">
           <button class="copy-chart-btn chart-overlay-btn" data-img="{{ charts.confusion }}" title="Copy chart">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             Copy
@@ -258,8 +258,8 @@
       {% if charts.actual_vs_pred %}
       <div class="mt-16">
         <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Actual vs Predicted</div>
-        <div style="position:relative;display:inline-block;">
-          <img src="data:image/png;base64,{{ charts.actual_vs_pred }}" alt="Actual vs Predicted" style="max-width:420px;border-radius:var(--radius);display:block;">
+        <div class="chart-responsive-wrap">
+          <img src="data:image/png;base64,{{ charts.actual_vs_pred }}" alt="Actual vs Predicted" class="chart-responsive" style="max-width:420px;border-radius:var(--radius);display:block;">
           <button class="copy-chart-btn chart-overlay-btn" data-img="{{ charts.actual_vs_pred }}" title="Copy chart">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             Copy

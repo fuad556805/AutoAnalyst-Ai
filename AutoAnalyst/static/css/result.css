@@ -63,6 +63,40 @@
 /* ── SCORE BAR (best override) ───────────────────── */
 .score-bar-fill.best { background: var(--success) !important; }
 
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 900px) {
+  .best-banner {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 20px 22px;
+  }
+  .best-banner > div:last-child { text-align: left; }
+  .best-score { font-size: 30px; letter-spacing: -1px; }
+  .best-name  { font-size: 17px; }
+  .pipeline-steps-card { overflow-x: hidden; }
+  .pstep { flex-wrap: wrap; gap: 8px; }
+  .pstep-badge { order: -1; margin-left: auto; }
+  .split-bar { font-size: 10px; }
+  .metrics-grid { gap: 8px; }
+  .metric-box { min-width: 80px; padding: 12px 14px; flex: 1; }
+  .metric-val { font-size: 19px; }
+  .chart-responsive { max-width: 100% !important; width: 100% !important; display: block; }
+  .chart-responsive-wrap { display: block !important; position: relative; max-width: 100%; }
+}
+
+@media (max-width: 600px) {
+  .best-banner { padding: 16px 16px; }
+  .best-name  { font-size: 15px; }
+  .best-score { font-size: 24px; }
+  .metric-box { padding: 10px 12px; }
+  .metric-val { font-size: 16px; }
+  .pstep-num  { width: 22px; height: 22px; font-size: 10px; }
+  .pstep-title { font-size: 13px; }
+  .pstep-desc  { font-size: 12px; }
+  .insights-list .insight-text { font-size: 13px; }
+  .copy-toast { font-size: 12px; padding: 8px 16px; bottom: 16px; }
+}
+
 /* ── COPY CHART BUTTON ───────────────────────────── */
 .copy-chart-btn {
   display: inline-flex;
