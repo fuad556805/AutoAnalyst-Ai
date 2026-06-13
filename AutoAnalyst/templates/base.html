@@ -223,7 +223,7 @@
 {% block content %}{% endblock %}
 
 <footer>
-  <div class="footer-main">
+  <div class="footer-inner">
     <div class="footer-brand">
       <div class="f-icon">
         <svg viewBox="0 0 16 16" fill="none">
@@ -239,6 +239,11 @@
   </div>
 
   <div class="footer-right">
+    <div class="footer-legal">
+      <a href="{% url 'privacy' %}">Privacy Policy</a>
+      <span>·</span>
+      <a href="{% url 'terms' %}">Terms of Service</a>
+    </div>
     {% block footer_extra %}{% endblock %}
     <span class="footer-copy">© 2026 AutoAnalyst AI</span>
   </div>

@@ -771,40 +771,39 @@ select option { background: var(--white); }
 footer {
   border-top: 1px solid var(--border);
   background: var(--bg-subtle);
-  font-size: 13px;
+  padding: 28px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.footer-inner { display: flex; flex-direction: column; gap: 4px; }
+.footer-brand { display: flex; align-items: center; gap: 8px; }
+.footer-brand .f-icon { width: 22px; height: 22px; background: var(--black); border-radius: 5px; display: flex; align-items: center; justify-content: center; }
+.footer-brand .f-icon svg { width: 11px; height: 11px; }
+.footer-brand span { font-size: 13px; font-weight: 700; color: var(--black); letter-spacing: -0.2px; }
+.footer-tagline { font-size: 12px; color: var(--muted2); margin: 0; }
+
+.footer-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.footer-legal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
   color: var(--muted2);
 }
-.footer-top {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 48px;
-  padding: 48px 48px 40px;
-  align-items: start;
+.footer-legal a {
+  font-size: 12px; color: var(--muted2); text-decoration: none;
+  font-weight: 500; transition: color .15s;
 }
-.footer-brand-col { display: flex; flex-direction: column; gap: 0; max-width: 380px; }
-.footer-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-.footer-brand .f-icon { width: 24px; height: 24px; background: var(--black); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-.footer-brand .f-icon svg { width: 12px; height: 12px; }
-.footer-brand span { font-size: 14px; font-weight: 700; color: var(--black); letter-spacing: -0.3px; }
-.footer-desc { font-size: 13px; color: var(--muted2); line-height: 1.65; margin-bottom: 18px; }
-.footer-email-link {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-size: 12.5px; font-weight: 600; color: var(--muted);
-  text-decoration: none; transition: color .15s;
-}
-.footer-email-link:hover { color: var(--black); }
-
-.footer-nav-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-.footer-col { display: flex; flex-direction: column; gap: 10px; }
-.footer-col-title {
-  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.9px; color: var(--black); margin-bottom: 4px;
-}
-.footer-col a {
-  font-size: 13px; color: var(--muted); text-decoration: none;
-  transition: color .15s; font-weight: 500;
-}
-.footer-col a:hover { color: var(--black); }
+.footer-legal a:hover { color: var(--black); }
+.footer-legal span { color: var(--border-strong); font-size: 10px; }
 
 .footer-admin-btn {
   display: inline-flex; align-items: center; gap: 6px;
@@ -812,20 +811,12 @@ footer {
   text-decoration: none; border: 1px solid var(--border);
   border-radius: 8px; padding: 6px 12px; background: var(--white);
   transition: background .15s, border-color .15s, color .15s;
-  margin-top: 4px; width: fit-content;
+  width: fit-content;
 }
 .footer-admin-btn:hover { background: var(--black); color: #fff; border-color: var(--black); }
 .footer-admin-btn svg { width: 13px; height: 13px; }
 
-.footer-bottom {
-  border-top: 1px solid var(--border);
-  padding: 16px 48px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.footer-copy { font-size: 12px; color: var(--muted2); }
-.footer-made { font-size: 12px; color: var(--muted2); }
+.footer-copy { font-size: 11.5px; color: var(--muted2); margin: 0; }
 
 /* ── LEGAL PAGES ─────────────────────────────────── */
 .legal-page { padding: 64px 0 96px; min-height: 60vh; }
@@ -855,8 +846,7 @@ footer {
   .nav-mobile-backdrop.open { pointer-events: auto; }
   .nav-mobile { display: flex; }
   .predict-grid { grid-template-columns: 1fr; }
-  .footer-top { grid-template-columns: 1fr; gap: 32px; padding: 36px 20px 28px; }
-  .footer-nav-cols { grid-template-columns: 1fr 1fr; gap: 24px; }
-  .footer-bottom { padding: 14px 20px; flex-direction: column; gap: 4px; text-align: center; }
+  footer { padding: 24px 20px; flex-direction: column; align-items: flex-start; gap: 20px; }
+  .footer-right { align-items: flex-start; }
   .auth-card { padding: 28px 20px; }
 }
