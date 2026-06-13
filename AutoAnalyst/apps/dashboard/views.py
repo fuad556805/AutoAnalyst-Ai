@@ -70,3 +70,28 @@ def delete_dataset(request, pk):
     ds.delete()
     messages.success(request, f'Dataset "{ds.name}" deleted.')
     return redirect('dashboard')
+
+
+@login_required(login_url='/login/')
+@require_POST
+def clear_history(request):
+    user = request.user
+    clear_type = request.POST.get('clear_type', 'all')
+
+    if clear_type == 'all':
+        Prediction.objects.filter(user=user).delete()
+        TrainingRun.objects.filter(user=user).delete()
+        Dataset.objects.filter(user=user).delete()
+        messages.success(request, 'All history cleared successfully.')
+    elif clear_type == 'training':
+        Prediction.objects.filter(user=user).delete()
+        TrainingRun.objects.filter(user=user).delete()
+        messages.success(request, 'Training runs and predictions cleared.')
+    elif clear_type == 'predictions':
+        Prediction.objects.filter(user=user).delete()
+        messages.success(request, 'Prediction history cleared.')
+    elif clear_type == 'datasets':
+        Dataset.objects.filter(user=user).delete()
+        messages.success(request, 'Dataset history cleared.')
+
+    return redirect('dashboard')
