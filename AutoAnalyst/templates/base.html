@@ -10,6 +10,57 @@
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block extra_css %}{% endblock %}
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2309090b'/><rect x='5' y='5' width='9' height='9' rx='2' fill='white'/><rect x='18' y='5' width='9' height='9' rx='2' fill='white' opacity='.5'/><rect x='5' y='18' width='9' height='9' rx='2' fill='white' opacity='.5'/><rect x='18' y='18' width='9' height='9' rx='2' fill='white'/></svg>">
+  <style>
+    @keyframes floatBubble {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+    .floating-chat-btn {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 999;
+      width: 54px;
+      height: 54px;
+      background: #09090b;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 18px rgba(9,9,11,0.22), 0 1.5px 5px rgba(9,9,11,0.13);
+      text-decoration: none;
+      animation: floatBubble 3s ease-in-out infinite;
+      transition: box-shadow .2s, background .2s;
+    }
+    .floating-chat-btn:hover {
+      background: #27272a;
+      box-shadow: 0 8px 28px rgba(9,9,11,0.28);
+      animation-play-state: paused;
+    }
+    .floating-chat-btn svg { width: 24px; height: 24px; }
+    .floating-chat-tooltip {
+      position: fixed;
+      bottom: 90px;
+      right: 28px;
+      z-index: 998;
+      background: #09090b;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .3px;
+      padding: 5px 11px;
+      border-radius: 20px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .2s, transform .2s;
+      white-space: nowrap;
+    }
+    .floating-chat-btn:hover + .floating-chat-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
 </head>
 <body>
 
@@ -184,7 +235,17 @@
     <span>AutoAnalyst AI</span>
   </div>
   <span>© 2026 AutoAnalyst AI. Transform raw data into predictions.</span>
+  {% block footer_extra %}{% endblock %}
 </footer>
+
+{% if request.resolver_match.url_name != 'chat' %}
+<a href="{% url 'chat' %}" class="floating-chat-btn" title="AI Chat">
+  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+</a>
+<span class="floating-chat-tooltip">Ask AI</span>
+{% endif %}
 
 <script src="{% static 'js/main.js' %}"></script>
 {% block extra_js %}{% endblock %}
