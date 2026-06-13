@@ -223,48 +223,29 @@
 {% block content %}{% endblock %}
 
 <footer>
-  <div class="footer-top">
-    <div class="footer-brand-col">
-      <div class="footer-brand">
-        <div class="f-icon">
-          <svg viewBox="0 0 16 16" fill="none">
-            <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
-            <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
-            <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
-            <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
-          </svg>
-        </div>
-        <span>AutoAnalyst AI</span>
+  <div class="footer-main">
+    <div class="footer-brand">
+      <div class="f-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="9" y="1" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5" fill="white" opacity=".5"/>
+          <rect x="9" y="9" width="6" height="6" rx="1.5" fill="white"/>
+        </svg>
       </div>
-      <p class="footer-desc">An intelligent AutoML platform that transforms raw datasets into trained machine learning models — no code required.</p>
-      <a href="mailto:fuad556805@gmail.com" class="footer-email-link">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        fuad556805@gmail.com
-      </a>
+      <span>AutoAnalyst AI</span>
     </div>
-
-    <div class="footer-nav-cols">
-      <div class="footer-col">
-        <span class="footer-col-title">Platform</span>
-        <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'upload' %}">Upload Dataset</a>
-        <a href="{% url 'results' %}">Results</a>
-        <a href="{% url 'predict' %}">Predict</a>
-        <a href="{% url 'chat' %}">AI Chat</a>
-      </div>
-      <div class="footer-col">
-        <span class="footer-col-title">Legal</span>
-        <a href="{% url 'privacy' %}">Privacy Policy</a>
-        <a href="{% url 'terms' %}">Terms of Service</a>
-        <a href="mailto:fuad556805@gmail.com">Contact Us</a>
-        {% block footer_extra %}{% endblock %}
-      </div>
-    </div>
+    <p class="footer-tagline">Transform raw data into AI predictions.</p>
   </div>
 
-  <div class="footer-bottom">
-    <span class="footer-copy">© 2026 AutoAnalyst AI. All rights reserved.</span>
-    <span class="footer-made">Built with scikit-learn &amp; Django</span>
+  <div class="footer-right">
+    <div class="footer-legal-links">
+      <a href="{% url 'privacy' %}">Privacy Policy</a>
+      <span class="footer-dot">·</span>
+      <a href="{% url 'terms' %}">Terms of Service</a>
+    </div>
+    {% block footer_extra %}{% endblock %}
+    <span class="footer-copy">© 2026 AutoAnalyst AI</span>
   </div>
 </footer>
 
